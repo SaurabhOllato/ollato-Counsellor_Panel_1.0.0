@@ -6,33 +6,54 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import statesAndDistricts from "../../public/states-and-districts.json";
 
 const Registration = () => {
-  const [formData, setFormData] = useState({
-    fullName: "",
+  const [personalDetails, setPersonalDetails] = useState({
+    profilePicture: null,
+    firstName: "",
+    lastName: "",
     gender: "",
+    birthDate: "",
+  });
+
+  const [contactDetails, setContactDetails] = useState({
     email: "",
     phone: "",
-    birthDate: "",
     state: "",
-    district: "",
-    zipcode: "",
-    licenseNumber: "",
-    qualification: "",
-    specification: "",
-    experience: "",
-    profilePicture: null,
-    degreeCertificate: null,
-    resume: null,
-    aadharNumber: "",
-    aadharFront: null,
-    aadharBack: null,
-    panNumber: "",
-    panCard: null,
-    signature: null,
-    expertiseCareerCounsellor: false,
-    expertisePsychologist: false,
-    expertiseGroupCounsellor: false,
+    city: "",
+  });
+
+  const [accountDetails, setAccountDetails] = useState({
     password: "",
     confirmPassword: "",
+  });
+
+  // const [educationDetails, setEducationDetails] = useState({
+  //   licenseNumber: "",
+  //   qualification: "",
+  //   specialization: "",
+  //   experience: "",
+  //   institutionName: "",
+  // });
+
+  // const [documentation, setDocumentation] = useState({
+  //   degreeCertificate: null,
+  //   resume: null,
+  //   aadharNumber: "",
+  //   aadharFront: null,
+  //   aadharBack: null,
+  //   panNumber: "",
+  //   panCard: null,
+  //   signature: null,
+  //   expertise: {
+  //     careerCounsellor: false,
+  //     psychologist: false,
+  //     groupCounsellor: false,
+  //   },
+  // });
+
+  const [formData, setFormData] = useState({
+    personalDetails: personalDetails,
+    contactDetails: contactDetails,
+    accountDetails: accountDetails,
   });
 
   const [otp, setOtp] = useState("");
@@ -42,16 +63,11 @@ const Registration = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [otpModal, setOtpModal] = useState(false);
   const [otpField, setOtpField] = useState("");
-  const [emailVerified, setEmailVerified] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
   const [notification, setNotification] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
   const [districts, setDistricts] = useState([]);
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [emailOtpVerified, setEmailOtpVerified] = useState(false);
-  const [phoneOtpVerified, setPhoneOtpVerified] = useState(false);
+
 
   const apiBaseUrl = "https://example.com/api"; // Base URL for API
 
@@ -100,32 +116,12 @@ const Registration = () => {
       setNotification("Error verifying OTP. Please try again.");
     }
   };
-
-  // Function to handle state selection and populate districts
-  const handleStateChange = (event) => {
-    const selectedState = event.target.value;
-    setFormData((prevData) => ({
-      ...prevData,
-      state: selectedState,
-      district: "",
-    }));
-
-    // Find the selected state's districts
-    const selectedStateData = statesAndDistricts.states.find(
-      (s) => s.state === selectedState
-    );
-    setDistricts(selectedStateData ? selectedStateData.districts : []);
+  const handleVerifyPhone = () => {
+    sendOtp("phone");
+    setOtpModal(true);
   };
-
-  const handleDistrictChange = (event) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      district: event.target.value,
-    }));
-  };
-
-  const handleOtpClick = (type) => {
-    setOtpField(type);
+  const handleVerifyEmail = () => {
+    sendOtp("email");
     setOtpModal(true);
   };
 
@@ -142,31 +138,55 @@ const Registration = () => {
       }
       setOtpVerified(true);
       setOtpModal(false);
+      verifyOtp(otpField);
       setOtp(""); // Reset OTP input
     } else {
       setNotification("Invalid OTP. Please try again.");
     }
   };
 
+  // Function to handle state selection and populate districts
+  const handleStateChange = (e) => {
+    const selectedState = e.target.value;
+    setFormData((prevData) => ({
+      ...prevData,
+      contactDetails: {
+        ...prevData.contactDetails,
+        state: selectedState,
+        city: "",
+      },
+    }));
+    const selectedStateData = statesAndDistricts.states.find(
+      (s) => s.state === selectedState
+    );
+    setDistricts(selectedStateData ? selectedStateData.districts : []);
+  };
+
+  const handleDistrictChange = (event) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      district: event.target.value,
+    }));
+  };
+
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    setFormData({
+      ...formData,
       [name]: type === "checkbox" ? checked : value,
-    }));
+    });
   };
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    setFormData((prev) => ({
+      ...prev.documentation,
+      [name]: files[0],
+    }));
   };
 
   const handleNext = () => {
     if (step < 3) setStep(step + 1);
-  };
-
-  const handleLoginRedirect = () => {
-    navigate("/");
   };
 
   const handleSubmit = async (e) => {
@@ -174,12 +194,27 @@ const Registration = () => {
     setNotification("");
     setError(null);
 
-    if (formData.password !== formData.confirmPassword) {
+    if (
+      formData.accountDetails.password !==
+      formData.accountDetails.confirmPassword
+    ) {
       setError("Passwords don't match!");
       return;
     }
 
-    if (!formData.email || !formData.password || !formData.fullName) {
+    if (
+      !formData.personalDetails.firstName ||
+      !formData.personalDetails.lastName ||
+      !formData.personalDetails.email ||
+      !formData.contactDetails.state ||
+      !formData.contactDetails.city ||
+      !formData.contactDetails.phoneNumber ||
+      !formData.accountDetails.password ||
+      !formData.accountDetails.confirmPassword ||
+      !formData.educationDetails.qualification ||
+      !formData.educationDetails.specialization ||
+      !formData.educationDetails.experience
+    ) {
       setError("Please fill in all required fields");
       return;
     }
@@ -210,20 +245,24 @@ const Registration = () => {
     //   setLoading(false);
     // }
 
-    setTimeout(() => navigate("/"), 3000);
+    setTimeout(() => {
+      setLoading(false);
+
+      navigate("/");
+    }, 3000);
 
     console.log("Registration data:", formData);
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-100">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 overflow-y-auto">
       {/* Left side logo */}
-      <div className="w-full md:w-1/4 bg-[#2C394B] flex items-center justify-center p-8">
+      <div className="w-full md:w-1/3 bg-[#2C394B] flex items-center justify-center p-8">
         <img src={LOGO} alt="Logo" className="w-1/2 h-auto" />
       </div>
 
       {/* Right side form */}
-      <div className="w-full md:w-3/4 p-6 md:p-8 h-full md:flex md:flex-col">
+      <div className="w-full h-full md:w-2/3 p-6 md:p-8 flex flex-col overflow-y-auto">
         <div className="bg-white p-8 rounded-lg shadow-lg mx-auto w-full">
           <h1 className="text-2xl text-[#2C394B] font-semibold mb-6 text-center">
             Welcome to Registration
@@ -234,38 +273,13 @@ const Registration = () => {
               {notification}
             </div>
           )}
-
           {error && (
             <div className="text-[#b13e31] text-center mb-4">{error}</div>
           )}
-          {success && (
-            <div className="text-[#25852a] text-center mb-4">{success}</div>
-          )}
-          {emailOtpVerified && <div>Email has been verified!</div>}
-          {phoneOtpVerified && <div>Phone has been verified!</div>}
-
-          {/* Step Navigation numbers
-          <div className="flex justify-between mb-4">
-            {[1, 2, 3].map((num) => (
-              <span
-                key={num}
-                className={`cursor-pointer ${
-                  step === num ? "text-[#2C394B]" : "text-gray-400"
-                } font-semibold text-center`}
-                onClick={() => setStep(num)}
-              >
-                {num}
-              </span>
-            ))}
-          </div> */}
 
           {/* Step Header */}
-          <div className="flex justify-between mb-4 flex-wrap sm:gap-1 sm:flex-col md:flex-row md:gap-1">
-            {[
-              "General Details",
-              "Professional Details",
-              "Documentation Details",
-            ].map((title, index) => (
+          <div className="flex justify-between mb-4 flex-wrap">
+            {["Personal Details"].map((title, index) => (
               <span
                 key={index}
                 className={`cursor-pointer ${
@@ -279,98 +293,120 @@ const Registration = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            {/* General Details */}
+            {/* Step 1: Personal Details */}
             {step === 1 && (
-              <>
-                {/* Full Name and Gender */}
-                <div className="mb-4 flex flex-col md:flex-row md:space-x-4">
-                  <div className="flex-1">
-                    <label htmlFor="fullName" className="block text-gray-600">
-                      Full Name *
-                    </label>
-                    <input
-                      id="fullName"
-                      type="text"
-                      name="fullName"
-                      placeholder="Enter Your Full Name"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label htmlFor="gender" className="block text-gray-600">
-                      Gender *
-                    </label>
-                    <select
-                      id="gender"
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    >
-                      <option value="" disabled>
-                        Select Gender
-                      </option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* First Name */}
+                <InputField
+                  label="First Name"
+                  name="personalDetails.firstName"
+                  placeholder="Enter your first name"
+                  value={formData.personalDetails.firstName}
+                  handleChange={handleChange}
+                />
+                {/* Last Name */}
+                <InputField
+                  label="Last Name"
+                  name="personalDetails.lastName"
+                  placeholder="Enter your last name"
+                  value={formData.personalDetails.lastName}
+                  handleChange={handleChange}
+                />
+                {/* Email */}
+                <InputField
+                  label="Email"
+                  name="contactDetails.email"
+                  placeholder="Enter your email"
+                  type="email"
+                  value={formData.contactDetails.email}
+                  handleChange={handleChange}
+                />
+                {/* Phone */}
+                <InputField
+                  label="Phone"
+                  name="contactDetails.phone"
+                  placeholder="Enter your phone number"
+                  type="text"
+                  value={formData.contactDetails.phone}
+                  handleChange={handleChange}
+                />
+                <div className="flex space-x-2">
+                  {/* Verify Email Button */}
+                  <button
+                    type="button"
+                    onClick={handleVerifyEmail}
+                    className="text-[#2C394B] bg-[#f1f5f9] border border-[#2C394B] hover:bg-[#2C394B] hover:text-[#f1f5f9] p-2 rounded"
+                  >
+                    Verify Email
+                  </button>
+                  {/* Verify Phone Button */}
+                  <button
+                    type="button"
+                    onClick={handleVerifyPhone}
+                    className="text-[#2C394B] bg-[#f1f5f9] border border-[#2C394B] hover:bg-[#2C394B] hover:text-[#f1f5f9] p-2 rounded"
+                  >
+                    Verify Phone
+                  </button>
                 </div>
-
-                {/* Email and Phone */}
-                <div className="mb-4 flex flex-col md:flex-row md:space-x-4">
-                  <div className="flex-1">
-                    <label htmlFor="email" className="block text-gray-600">
-                      Email *
-                    </label>
-                    <input
-                      id="email"
-                      type="email"
-                      name="email"
-                      placeholder="Enter your email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      disabled={emailOtpVerified}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                    {!emailVerified && (
-                      <button
-                        type="button"
-                        onClick={() => handleOtpClick("email")}
-                        className="mt-2 bg-[#2C394B] text-white px-4 py-2 rounded-md"
-                      >
-                        Verify Email OTP
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <label htmlFor="phone" className="block text-gray-600">
-                      Phone Number *
-                    </label>
-                    <input
-                      id="phone"
-                      type="text"
-                      name="phone"
-                      placeholder="Enter Your Phone Number"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      disabled={phoneOtpVerified}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                    {!phoneVerified && (
-                      <button
-                        type="button"
-                        onClick={() => handleOtpClick("phone")}
-                        className="mt-2 bg-[#2C394B] text-white px-4 py-2 rounded-md"
-                      >
-                        Verify Phone OTP
-                      </button>
-                    )}
-                  </div>
-                </div>
-
+                {/* Gender */}
+                <InputField
+                  label="Gender"
+                  name="personalDetails.gender"
+                  value={formData.personalDetails.gender}
+                  handleChange={handleChange}
+                  component="select"
+                >
+                  <option value="" disabled>
+                    Select Gender
+                  </option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </InputField>
+                {/* Date of Birth */}
+                <InputField
+                  label="Date of Birth"
+                  name="personalDetails.birthDate"
+                  value={formData.personalDetails.birthDate}
+                  handleChange={handleChange}
+                  component="input"
+                  type="date"
+                />
+                {/* State Dropdown */}
+                <InputField
+                  label="State"
+                  name="contactDetails.state"
+                  value={formData.contactDetails.state}
+                  handleChange={handleStateChange}
+                  component="select"
+                >
+                  <option value="" disabled>
+                    Select State
+                  </option>
+                  {statesAndDistricts.states.map((state) => (
+                    <option key={state.state} value={state.state}>
+                      {state.state}
+                    </option>
+                  ))}
+                </InputField>
+                {/* District Dropdown */}
+                <InputField
+                  label="District"
+                  name="contactDetails.city"
+                  value={formData.contactDetails.city}
+                  handleChange={handleDistrictChange}
+                  component="select"
+                >
+                  <option value="" disabled>
+                    Select City
+                  </option>
+                  {districts.map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
+                </InputField>
+                {/* OTP Modal */}
                 {otpModal && (
                   <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-lg w-11/12 md:w-1/3">
@@ -399,429 +435,56 @@ const Registration = () => {
                     </div>
                   </div>
                 )}
+                {/* Password Field */}
+                <InputField
+                  label="Password *"
+                  name="accountDetails.password"
+                  placeholder="Password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.accountDetails.password}
+                  handleChange={handleChange}
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-5 cursor-pointer"
+                >
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                </span>
 
-                {/* Date of Birth and State/District */}
-                <div className="mb-4 flex flex-col md:flex-row md:space-x-4">
-                  <div className="flex-1">
-                    <label htmlFor="birthDate" className="block text-gray-600">
-                      Date of Birth *
-                    </label>
-                    <input
-                      id="birthDate"
-                      type="date"
-                      name="birthDate"
-                      value={formData.birthDate}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label htmlFor="state" className="block text-gray-600">
-                      State *
-                    </label>
-                    <select
-                      id="state"
-                      name="state"
-                      value={formData.state}
-                      onChange={handleStateChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    >
-                      <option value="" disabled>
-                        Select State
-                      </option>
-                      {statesAndDistricts.states.map((state) => (
-                        <option key={state.state} value={state.state}>
-                          {state.state}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="mb-4 flex flex-col md:flex-row md:space-x-4">
-                  <div className="flex-1">
-                    <label htmlFor="district" className="block text-gray-600">
-                      District *
-                    </label>
-                    <select
-                      id="district"
-                      name="district"
-                      value={formData.district}
-                      onChange={handleDistrictChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      disabled={districts.length === 0} // Disable dropdown if no districts are available
-                    >
-                      <option value="" disabled>
-                        Select District
-                      </option>
-                      {districts.map((district) => (
-                        <option key={district} value={district}>
-                          {district}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex-1">
-                    <label htmlFor="zipcode" className="block text-gray-600">
-                      Zip Code *
-                    </label>
-                    <input
-                      id="zipcode"
-                      type="text"
-                      name="zipcode"
-                      placeholder="Enter Zip Code"
-                      value={formData.zipcode}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-4 flex justify-center w-full">
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    className="w-fit bg-[#2C394B] text-white py-1 px-2 rounded-md"
-                  >
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Professional Details */}
-            {step === 2 && (
-              <div>
-                {/* License Number and Qualification */}
-                <div className="mb-4 flex flex-col md:flex-row md:space-x-4">
-                  <div className="flex-1">
-                    <label
-                      htmlFor="licenseNumber"
-                      className="block text-gray-600"
-                    >
-                      License Number *
-                    </label>
-                    <input
-                      id="licenseNumber"
-                      type="text"
-                      name="licenseNumber"
-                      placeholder="If No, put NA"
-                      value={formData.licenseNumber}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label
-                      htmlFor="qualification"
-                      className="block text-gray-600"
-                    >
-                      Qualification *
-                    </label>
-                    <input
-                      id="qualification"
-                      type="text"
-                      name="qualification"
-                      placeholder="Enter your qualification"
-                      value={formData.qualification}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                </div>
-
-                {/* Specification and Experience */}
-                <div className="mb-4 flex flex-col md:flex-row md:space-x-4">
-                  <div className="flex-1">
-                    <label
-                      htmlFor="specification"
-                      className="block text-gray-600"
-                    >
-                      Specification *
-                    </label>
-                    <input
-                      id="specification"
-                      type="text"
-                      name="specification"
-                      placeholder="Enter your specification"
-                      value={formData.specification}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label htmlFor="experience" className="block text-gray-600">
-                      Experience *
-                    </label>
-                    <input
-                      id="experience"
-                      type="text"
-                      name="experience"
-                      placeholder="Enter your experience"
-                      value={formData.experience}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-4 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    className="w-fit bg-[#2C394B] text-white py-1 px-2 rounded-md"
-                  >
-                    Next
-                  </button>
-                </div>
+                {/* Confirm Password Field */}
+                <InputField
+                  label="Confirm Password *"
+                  name="accountDetails.confirmPassword"
+                  placeholder="Confirm Password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={formData.accountDetails.confirmPassword}
+                  handleChange={handleChange}
+                />
+                <span
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-5 cursor-pointer"
+                >
+                  {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                </span>
               </div>
             )}
 
-            {/* Documentation Details */}
-            {step === 3 && (
-              <div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 h-full md:text-sm md:gap-2">
-                  <div className="w-full">
-                    <label
-                      htmlFor="profilePicture"
-                      className="block text-gray-600"
-                    >
-                      Upload Profile Picture *
-                    </label>
-                    <input
-                      id="profilePicture"
-                      type="file"
-                      name="profilePicture"
-                      onChange={handleFileChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="degreeCertificate"
-                      className="block text-gray-600"
-                    >
-                      Upload Degree Certificate *
-                    </label>
-                    <input
-                      id="degreeCertificate"
-                      type="file"
-                      name="degreeCertificate"
-                      onChange={handleFileChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="resume" className="block text-gray-600">
-                      Upload Resume *
-                    </label>
-                    <input
-                      id="resume"
-                      type="file"
-                      name="resume"
-                      onChange={handleFileChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <label
-                      htmlFor="aadharNumber"
-                      className="block text-gray-600"
-                    >
-                      Aadhar Number *
-                    </label>
-                    <input
-                      id="aadharNumber"
-                      type="text"
-                      name="aadharNumber"
-                      placeholder="Enter Aadhar number"
-                      value={formData.aadharNumber}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="aadharFront"
-                      className="block text-gray-600"
-                    >
-                      Upload Aadhar Card Front *
-                    </label>
-                    <input
-                      id="aadharFront"
-                      type="file"
-                      name="aadharFront"
-                      onChange={handleFileChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="aadharBack" className="block text-gray-600">
-                      Upload Aadhar Card Back *
-                    </label>
-                    <input
-                      id="aadharBack"
-                      type="file"
-                      name="aadharBack"
-                      onChange={handleFileChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <label htmlFor="panNumber" className="block text-gray-600">
-                      PAN Number *
-                    </label>
-                    <input
-                      id="panNumber"
-                      type="text"
-                      name="panNumber"
-                      placeholder="Enter PAN Number"
-                      value={formData.panNumber}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="panCard" className="block text-gray-600">
-                      Upload PAN Card *
-                    </label>
-                    <input
-                      id="panCard"
-                      type="file"
-                      name="panCard"
-                      onChange={handleFileChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="signature" className="block text-gray-600">
-                      Signature *
-                    </label>
-                    <input
-                      id="signature"
-                      type="file"
-                      name="signature"
-                      onChange={handleFileChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <label className="block text-gray-600 mb-2">
-                    Professional Expertise *
-                  </label>
-                  <div>
-                    <div className="flex items-center mb-2">
-                      <input
-                        type="checkbox"
-                        name="expertiseCareerCounsellor"
-                        checked={formData.expertiseCareerCounsellor}
-                        onChange={handleChange}
-                        className="h-5 w-5 text-[#2C394B] border-gray-300 rounded focus:ring-[#2C394B]"
-                      />
-                      <label className="ml-2 text-gray-600">
-                        Career Counsellor
-                      </label>
-                    </div>
-                    <div className="flex items-center mb-2">
-                      <input
-                        type="checkbox"
-                        name="expertisePsychologist"
-                        checked={formData.expertisePsychologist}
-                        onChange={handleChange}
-                        className="h-5 w-5 text-[#2C394B] border-gray-300 rounded focus:ring-[#2C394B]"
-                      />
-                      <label className="ml-2 text-gray-600">Psychologist</label>
-                    </div>
-                    <div className="flex items-center mb-2">
-                      <input
-                        type="checkbox"
-                        name="expertiseGroupCounsellor"
-                        checked={formData.expertiseGroupCounsellor}
-                        onChange={handleChange}
-                        className="h-5 w-5 text-[#2C394B] border-gray-300 rounded focus:ring-[#2C394B]"
-                      />
-                      <label className="ml-2 text-gray-600">
-                        Group Counsellor
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div className="relative">
-                    <label htmlFor="password" className="block text-gray-600">
-                      Create Password *
-                    </label>
-                    <input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      placeholder="Create a password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute top-9 right-3 cursor-pointer"
-                    >
-                      {showPassword ? <FiEyeOff /> : <FiEye />}
-                    </span>
-                  </div>
-
-                  <div className="relative">
-                    <label
-                      htmlFor="confirmPassword"
-                      className="block text-gray-600"
-                    >
-                      Confirm Password *
-                    </label>
-                    <input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      placeholder="Confirm your password"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    />
-                    <span
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute top-9 right-3 cursor-pointer"
-                    >
-                      {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    className="bg-[#2C394B] text-white py-1 px-2 rounded-md w-fit"
-                  >
-                    {loading ? "Registering..." : "Register"}
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* Register Button */}
+            <div className="mt-4 flex justify-center">
+              <button
+                type="submit"
+                className="bg-[#2C394B] text-white py-2 px-4 rounded-md"
+              >
+                {loading ? "Registering..." : "Register"}
+              </button>
+            </div>
           </form>
           {/* Login Link */}
           <div className="absolute top-6 right-14 flex justify-center items-center mt-4">
             <p className="text-sm text-[#2C394B]">Already have an account?</p>
             <button
               className="ml-2 text-md text-[#2C394B] hover:text-[#597aac] hover:translate-x-1 transition duration-200 ease-in-out flex items-center gap-1"
-              onClick={handleLoginRedirect}
+              onClick={() => navigate("/")}
             >
               <FaArrowRightFromBracket />
               Login
@@ -829,6 +492,54 @@ const Registration = () => {
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+const InputField = ({
+  label,
+  type = "text",
+  name,
+  placeholder,
+  handleChange,
+  value,
+  options = [],
+  component = "input",
+  ...props
+}) => {
+  return (
+    <div className="mb-4 flex flex-col">
+      <label htmlFor={name} className="block text-[#2C394B]">
+        {label}
+        {props.required && "*"}
+      </label>
+      {type === "checkbox" && options.length > 0 ? (
+        <div className="flex flex-col">
+          {options.map((option, index) => (
+            <label key={index} className="inline-flex items-center mt-1">
+              <input
+                type="checkbox"
+                name={name}
+                value={option}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              {option}
+            </label>
+          ))}
+        </div>
+      ) : (
+        React.createElement(component, {
+          id: name,
+          type,
+          name,
+          placeholder,
+          value,
+          onChange: handleChange,
+          className: "w-full p-2 border border-gray-300 rounded-md",
+          ...props,
+        })
+      )}
     </div>
   );
 };
