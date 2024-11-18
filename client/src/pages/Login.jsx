@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
-function Login() {
+function Login({ setIsLoggedIn }) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -19,6 +19,8 @@ function Login() {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null); // To capture success messages
   const navigate = useNavigate();
+  
+  console.log("setIsLoggedIn", setIsLoggedIn);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,34 +33,36 @@ function Login() {
     setError(null);
     setSuccessMessage(null); // Clear previous success message
 
-    if (showOtpLogin) {
-      await handleVerifyOtp(); // Handle OTP verification
-    } else {
-      try {
-        const response = await fetch("/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
-        });
+    // if (showOtpLogin) {
+    //   await handleVerifyOtp(); // Handle OTP verification
+    // } else {
+    //   try {
+    //     const response = await fetch("/api/login", {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({
+    //         email: formData.email,
+    //         password: formData.password,
+    //       }),
+    //     });
 
-        if (response.ok) {
-          const data = await response.json();
-          localStorage.setItem("token", data.token);
-          setSuccessMessage("Login successful! Redirecting..."); // Set success message
-          navigate("/dashboard"); // Redirect to dashboard after message
-        } else {
-          const errorData = await response.json();
-          setError(errorData.message || "Invalid login credentials.");
-        }
-      } catch (error) {
-        setError("An error occurred while logging in.");
-      } finally {
-        setLoading(false);
-      }
-    }
+    //     if (response.ok) {
+    //       const data = await response.json();
+    //       localStorage.setItem("token", data.token);
+    //       setSuccessMessage("Login successful! Redirecting..."); // Set success message
+    //       navigate("/dashboard"); // Redirect to dashboard after message
+    //     } else {
+    //       const errorData = await response.json();
+    //       setError(errorData.message || "Invalid login credentials.");
+    //     }
+    //   } catch (error) {
+    //     setError("An error occurred while logging in.");
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // }
+    setIsLoggedIn(true);
+    navigate("/dashboard");
   };
 
   const handleSendOtp = async () => {
