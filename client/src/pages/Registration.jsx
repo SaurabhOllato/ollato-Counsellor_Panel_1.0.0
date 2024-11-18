@@ -7,7 +7,6 @@ import statesAndDistricts from "../../public/states-and-districts.json";
 
 const Registration = () => {
   const [personalDetails, setPersonalDetails] = useState({
-    profilePicture: null,
     firstName: "",
     lastName: "",
     gender: "",
@@ -58,170 +57,267 @@ const Registration = () => {
 
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState(1);
-  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [otpModal, setOtpModal] = useState(false);
-  const [otpField, setOtpField] = useState("");
-  const [notification, setNotification] = useState("");
+  // const [notification, setNotification] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" }); // New consolidated message state
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [districts, setDistricts] = useState([]);
+  const [isVerifying, setIsVerifying] = useState(false);
 
-
+  const navigate = useNavigate();
   const apiBaseUrl = "https://example.com/api"; // Base URL for API
 
-  const sendOtp = async (type) => {
-    try {
-      const response = await fetch(`${apiBaseUrl}/send-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type }), // Pass the type to the API (either "email" or "phone") *** change accordingly ***
-      });
-      if (response.ok) {
-        setOtpField(type);
-        setNotification("OTP sent successfully!");
-      } else {
-        throw new Error("Failed to send OTP");
-      }
-    } catch (error) {
-      console.error("Error sending OTP:", error);
-      setNotification("Error sending OTP. Please try again.");
-    }
+  const handlemessage = (text, type) => {
+    setMessage({ text, type }); // Update message state with text and type
+    setTimeout(() => {
+      setMessage({ text: "", type: "" }); // Reset message state after 3 seconds
+    }, 3000);
   };
 
-  const verifyOtp = async (type) => {
-    try {
-      const response = await fetch(`${apiBaseUrl}/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: otpField, otp }), // Pass the type and OTP to the API (both "email" or "phone" and the entered OTP) *** change accordingly ***
-      });
-      if (response.ok) {
-        if (otpField === "email") {
-          setEmailOtpVerified(true);
-          setNotification("Email OTP Verified Successfully!");
-        } else if (otpField === "phone") {
-          setPhoneOtpVerified(true);
-          setNotification("Phone OTP Verified Successfully!");
-        }
-        setOtp(""); // Clear the OTP field
-        setOtpModal(false);
-      } else {
-        setNotification("Invalid OTP. Please try again.");
-        throw new Error("Invalid OTP");
+  // const handleChange = (e) => {
+  //   const { name, type, checked, value } = e.target;
+
+  //   setFormData({
+  //     ...formData,
+  //     [name]: type === "checkbox" ? checked : value,
+  //   });
+  // };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    // Split the nested key (e.g., "personalDetails.firstName")
+    const keys = name.split(".");
+
+    // Use a functional state update to handle immutability
+    setFormData((prevState) => {
+      let newState = { ...prevState };
+      let current = newState;
+
+      // Navigate to the nested key
+      for (let i = 0; i < keys.length - 1; i++) {
+        current = current[keys[i]];
       }
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
-      setNotification("Error verifying OTP. Please try again.");
-    }
-  };
-  const handleVerifyPhone = () => {
-    sendOtp("phone");
-    setOtpModal(true);
-  };
-  const handleVerifyEmail = () => {
-    sendOtp("email");
-    setOtpModal(true);
+
+      // Update the value at the nested key
+      current[keys[keys.length - 1]] = value;
+
+      return newState;
+    });
   };
 
-  const handleOtpVerification = () => {
-    if (otp === "123456") {
-      if (otpField === "email") {
-        setEmailOtpVerified(true);
-        setEmailVerified(true);
-        setNotification("Email OTP Verified Successfully!");
-      } else if (otpField === "phone") {
-        setPhoneOtpVerified(true);
-        setPhoneVerified(true);
-        setNotification("Phone OTP Verified Successfully!");
-      }
-      setOtpVerified(true);
-      setOtpModal(false);
-      verifyOtp(otpField);
-      setOtp(""); // Reset OTP input
-    } else {
-      setNotification("Invalid OTP. Please try again.");
-    }
-  };
-
-  // Function to handle state selection and populate districts
   const handleStateChange = (e) => {
     const selectedState = e.target.value;
+
+    // Find the selected state's data
+    const selectedStateData = statesAndDistricts.states.find(
+      (s) => s.state === selectedState
+    );
+
+    // Update the formData with the selected state and clear the district (city)
     setFormData((prevData) => ({
       ...prevData,
       contactDetails: {
         ...prevData.contactDetails,
         state: selectedState,
-        city: "",
+        city: "", // Clear city (district) when state changes
       },
     }));
-    const selectedStateData = statesAndDistricts.states.find(
-      (s) => s.state === selectedState
-    );
+
+    // Update the districts based on the selected state
     setDistricts(selectedStateData ? selectedStateData.districts : []);
   };
 
-  const handleDistrictChange = (event) => {
+  const handleDistrictChange = (e) => {
+    const selectedDistrict = e.target.value;
+
+    // console.log("Selected District:", selectedDistrict);
+
+    // Update the formData with the selected district (city)
     setFormData((prevData) => ({
       ...prevData,
-      district: event.target.value,
+      contactDetails: {
+        ...prevData.contactDetails,
+        city: selectedDistrict, // Ensure city (district) is set correctly
+      },
     }));
   };
 
-  const handleChange = (e) => {
-    const { name, type, checked, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+  // const handleFileChange = (e) => {
+  //   const { name, files } = e.target;
+  //   setFormData((prev) => ({
+  //     ...prev.documentation,
+  //     [name]: files[0],
+  //   }));
+  // };
+
+  // const handleNext = () => {
+  //   if (step < 3) setStep(step + 1);
+  // };
+
+  const handleVerifyEmail = () => {
+    if (!contactDetails.email) {
+      // setNotification("Please enter an email address.");
+      handlemessage("Please enter an email address.", "error");
+      return;
+    }
+    sendOtp("email");
+    // setOtpModal(true);
   };
 
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    setFormData((prev) => ({
-      ...prev.documentation,
-      [name]: files[0],
-    }));
+  const handleVerifyPhone = () => {
+    if (!contactDetails.phone) {
+      // setNotification("Please enter a phone number.");
+      handlemessage("Please enter a phone number.", "error");
+      return;
+    }
+    sendOtp("phone");
+    // setOtpModal(true);
   };
 
-  const handleNext = () => {
-    if (step < 3) setStep(step + 1);
+  const sendOtp = async (type) => {
+    // try {
+    //   const response = await fetch(`${apiBaseUrl}/send-otp`, {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({ type }), // Pass the type to the API (either "email" or "phone") *** change accordingly ***
+    //   });
+    //   if (response.ok) {
+    //     setOtpField(type);
+    //     setNotification("OTP sent successfully!");
+    //     setOtpModal(true);
+    //   } else {
+    //     throw new Error("Failed to send OTP");
+    //   }
+    // } catch (error) {
+    //   console.error("Error sending OTP:", error);
+    //   setNotification("Error sending OTP. Please try again.");
+    // }
+    // mockOTP sending
+    // setNotification("OTP sent successfully!");
+    handlemessage("OTP sent successfully!", "success");
+    setOtpModal(true);
+  };
+
+  // const verifyOtp = async (type) => {
+  //   // try {
+  //   //   const response = await fetch(`${apiBaseUrl}/verify-otp`, {
+  //   //     method: "POST",
+  //   //     headers: { "Content-Type": "application/json" },
+  //   //     body: JSON.stringify({ type: otpField, otp }), // Pass the type and OTP to the API (both "email" or "phone" and the entered OTP) *** change accordingly ***
+  //   //   });
+  //   //   if (response.ok) {
+  //   //     if (otpField === "email") {
+  //   //       setEmailOtpVerified(true);
+  //   //       setNotification("Email OTP Verified Successfully!");
+  //   //     } else if (otpField === "phone") {
+  //   //       setPhoneOtpVerified(true);
+  //   //       setNotification("Phone OTP Verified Successfully!");
+  //   //     }
+  //   //     setOtp(""); // Clear the OTP field
+  //   //     setOtpModal(false);
+  //   //   } else {
+  //   //     setNotification("Invalid OTP. Please try again.");
+  //   //     throw new Error("Invalid OTP");
+  //   //   }
+  //   // } catch (error) {
+  //   //   console.error("Error verifying OTP:", error);
+  //   //   setNotification("Error verifying OTP. Please try again.");
+  //   // }
+  // };
+
+  const handleOtpVerification = async () => {
+    setNotification(""); // Clear any previous notification before starting
+    if (!otp || otp.length !== 6) {
+      // OTP validation
+      // setNotification("Please enter a valid 6-digit OTP.");
+      handlemessage("Please enter a valid 6-digit OTP.", "error");
+      return;
+    }
+    setIsVerifying(true); // Set isVerifying to true
+
+    // Simulate OTP check (for testing purposes, this is a mock check)
+    const isOtpValid = otp === "123456"; // Replace with real OTP validation logic
+
+    if (isOtpValid) {
+      //OTP is valid
+      // setNotification("OTP verified successfully!");
+      handlemessage("OTP verified successfully!", "success");
+      handleOtpVerificationSuccess(); // Call the success function
+    } else {
+      // OTP is invalid
+      // setNotification("Invalid OTP. Please try again.");
+      handlemessage("Invalid OTP. Please try again.", "error");
+    }
+    setIsVerifying(false); // Reset verifying state
+  };
+
+  const handleOtpVerificationSuccess = () => {
+    setOtpModal(false);
+
+    if (otpField === "email") {
+      setEmailOtpVerified(true);
+      setEmailVerified(true);
+      // setNotification("Email OTP Verified Successfully!");
+      handlemessage("Email OTP Verified Successfully!", "success");
+    } else if (otpField === "phone") {
+      setPhoneOtpVerified(true);
+      setPhoneVerified(true);
+      // setNotification("Phone OTP Verified Successfully!");
+      handlemessage("Phone OTP Verified Successfully!", "success");
+    }
+
+    setOtpVerified(true); // Mark OTP as verified
+    setOtpModal(false); // Close OTP modal
+    setOtp(""); // Clear OTP input
+    verifyOtp(otpField); // Call verifyOtp function with the OTP field type (email or phone)
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setNotification("");
-    setError(null);
+    // setNotification("");
+    setMessage({ text: "", type: "" });
+    // setError(null);
+
+    // Validation: Check for required fields
+    const {
+      personalDetails: { firstName, lastName, gender, birthDate },
+      contactDetails: { email, state, city, phone },
+      accountDetails: { password, confirmPassword },
+    } = formData;
 
     if (
-      formData.accountDetails.password !==
-      formData.accountDetails.confirmPassword
+      !firstName ||
+      !lastName ||
+      !email ||
+      !gender ||
+      !birthDate ||
+      !state ||
+      !city ||
+      !phone ||
+      !password ||
+      !confirmPassword
     ) {
-      setError("Passwords don't match!");
+      // setError("Please fill in all required fields");
+      handlemessage("Please fill in all required fields", "error");
       return;
     }
-
-    if (
-      !formData.personalDetails.firstName ||
-      !formData.personalDetails.lastName ||
-      !formData.personalDetails.email ||
-      !formData.contactDetails.state ||
-      !formData.contactDetails.city ||
-      !formData.contactDetails.phoneNumber ||
-      !formData.accountDetails.password ||
-      !formData.accountDetails.confirmPassword ||
-      !formData.educationDetails.qualification ||
-      !formData.educationDetails.specialization ||
-      !formData.educationDetails.experience
-    ) {
-      setError("Please fill in all required fields");
+    // Password Match Validation
+    if (password !== confirmPassword) {
+      // setError("Passwords don't match!");
+      handlemessage("Passwords don't match!", "error");
       return;
     }
 
     setLoading(true);
 
     // try {
+    //   // API Integration
     //   const response = await fetch("/api/register", {
     //     method: "POST",
     //     headers: {
@@ -232,21 +328,26 @@ const Registration = () => {
 
     //   if (response.ok) {
     //     const data = await response.json();
+    //     setNotification("Registration successful!");
+    //     console.log("Response Data:", data);
 
-    //     setSuccess("Registration successful!");
+    //     // Redirect to another page after success
     //     setTimeout(() => navigate("/"), 3000);
     //   } else {
     //     const errorData = await response.json();
     //     setError(errorData.message || "Registration failed.");
     //   }
     // } catch (error) {
+    //   console.error("Error during registration:", error);
     //   setError("An error occurred during registration.");
     // } finally {
     //   setLoading(false);
     // }
 
+    // Mock API Response
     setTimeout(() => {
       setLoading(false);
+      handlemessage("Registration successful!", "success");
 
       navigate("/");
     }, 3000);
@@ -268,13 +369,99 @@ const Registration = () => {
             Welcome to Registration
           </h1>
 
-          {notification && (
+          {/* {notification && (
             <div className="text-[#25852a] text-center mb-4">
               {notification}
             </div>
           )}
           {error && (
             <div className="text-[#b13e31] text-center mb-4">{error}</div>
+          )} */}
+
+          {/* {notification  */}
+          {/* {notification && (
+            <div className="py-4 bg-[#C4F9E2] text-[#004434] rounded-md flex items-center justify-center text-sm font-medium">
+              <span className="pr-3">
+                <svg
+                  width={20}
+                  height={20}
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle cx={10} cy={10} r={10} fill="#00B078" />
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M14.1203 6.78954C14.3865 7.05581 14.3865 7.48751 14.1203 7.75378L9.12026 12.7538C8.85399 13.02 8.42229 13.02 8.15602 12.7538L5.88329 10.4811C5.61703 10.2148 5.61703 9.78308 5.88329 9.51682C6.14956 9.25055 6.58126 9.25055 6.84753 9.51682L8.63814 11.3074L13.156 6.78954C13.4223 6.52328 13.854 6.52328 14.1203 6.78954Z"
+                    fill="white"
+                  />
+                </svg>
+              </span>
+              {notification}
+            </div>
+          )} */}
+
+          {/* error */}
+
+          {/* {error && (
+            <div className="py-4 bg-[#F8D7DA] text-[#721C24] rounded-md flex items-center justify-center text-sm font-medium">
+              <span className="pr-3">
+                <svg
+                  width={20}
+                  height={20}
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle cx={10} cy={10} r={10} fill="#D9534F" />
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M14.1203 6.78954C14.3865 7.05581 14.3865 7.48751 14.1203 7.75378L9.12026 12.7538C8.85399 13.02 8.42229 13.02 8.15602 12.7538L5.88329 10.4811C5.61703 10.2148 5.61703 9.78308 5.88329 9.51682C6.14956 9.25055 6.58126 9.25055 6.84753 9.51682L8.63814 11.3074L13.156 6.78954C13.4223 6.52328 13.854 6.52328 14.1203 6.78954Z"
+                    fill="white"
+                  />
+                </svg>
+              </span>
+              {error}
+            </div>
+          )} */}
+
+          {/*  */}
+          {message.text && (
+            <div
+              className={`fixed top-24 left-2/3 w-fit transform -translate-x-1/2 z-10 py-4 rounded-md flex items-center justify-center text-md font-medium ${
+                message.type === "success"
+                  ? "bg-[#C4F9E2] text-[#004434]"
+                  : "bg-[#F8D7DA] text-[#721C24]"
+              }`}
+            >
+              <span className="pr-3">
+                <svg
+                  width={20}
+                  height={20}
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx={10}
+                    cy={10}
+                    r={10}
+                    fill={message.type === "success" ? "#00B078" : "#D9534F"}
+                  />
+
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M14.1203 6.78954C14.3865 7.05581 14.3865 7.48751 14.1203 7.75378L9.12026 12.7538C8.85399 13.02 8.42229 13.02 8.15602 12.7538L5.88329 10.4811C5.61703 10.2148 5.61703 9.78308 5.88329 9.51682C6.14956 9.25055 6.58126 9.25055 6.84753 9.51682L8.63814 11.3074L13.156 6.78954C13.4223 6.52328 13.854 6.52328 14.1203 6.78954Z"
+                    fill="white"
+                  />
+                </svg>
+              </span>
+
+              {message.text}
+            </div>
           )}
 
           {/* Step Header */}
@@ -301,7 +488,7 @@ const Registration = () => {
                   label="First Name"
                   name="personalDetails.firstName"
                   placeholder="Enter your first name"
-                  value={formData.personalDetails.firstName}
+                  value={personalDetails.firstName}
                   handleChange={handleChange}
                 />
                 {/* Last Name */}
@@ -309,7 +496,7 @@ const Registration = () => {
                   label="Last Name"
                   name="personalDetails.lastName"
                   placeholder="Enter your last name"
-                  value={formData.personalDetails.lastName}
+                  value={personalDetails.lastName}
                   handleChange={handleChange}
                 />
                 {/* Email */}
@@ -330,29 +517,71 @@ const Registration = () => {
                   value={formData.contactDetails.phone}
                   handleChange={handleChange}
                 />
-                <div className="flex space-x-2">
+                <div>
                   {/* Verify Email Button */}
                   <button
                     type="button"
                     onClick={handleVerifyEmail}
+                    disabled={isVerifying} // Disable button if email is not entered
                     className="text-[#2C394B] bg-[#f1f5f9] border border-[#2C394B] hover:bg-[#2C394B] hover:text-[#f1f5f9] p-2 rounded"
                   >
                     Verify Email
                   </button>
+                </div>
+
+                <div>
                   {/* Verify Phone Button */}
                   <button
                     type="button"
                     onClick={handleVerifyPhone}
+                    disabled={isVerifying} // Disable button if phone is not entered
                     className="text-[#2C394B] bg-[#f1f5f9] border border-[#2C394B] hover:bg-[#2C394B] hover:text-[#f1f5f9] p-2 rounded"
                   >
                     Verify Phone
                   </button>
                 </div>
+
+                {/* OTP Modal */}
+                {otpModal && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 md:w-1/3">
+                      <h3 className="text-xl text-center mb-4">Enter OTP</h3>
+                      <input
+                        type="text"
+                        placeholder="Enter OTP"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md mb-4"
+                        aria-label="OTP Input field"
+                        maxLength={6}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleOtpVerification}
+                        className="w-full bg-[#337357] text-white py-2 rounded-md"
+                        disabled={!isVerifying}
+                      >
+                        {isVerifying ? "Verifying..." : "Verify OTP"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sendOtp("");
+                          setOtpModal(false);
+                        }}
+                        className="w-full bg-[#C62E2E] text-white py-2 rounded-md mt-2"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Gender */}
                 <InputField
                   label="Gender"
                   name="personalDetails.gender"
-                  value={formData.personalDetails.gender}
+                  value={personalDetails.gender}
                   handleChange={handleChange}
                   component="select"
                 >
@@ -367,7 +596,7 @@ const Registration = () => {
                 <InputField
                   label="Date of Birth"
                   name="personalDetails.birthDate"
-                  value={formData.personalDetails.birthDate}
+                  value={personalDetails.birthDate}
                   handleChange={handleChange}
                   component="input"
                   type="date"
@@ -400,49 +629,23 @@ const Registration = () => {
                   <option value="" disabled>
                     Select City
                   </option>
-                  {districts.map((district) => (
-                    <option key={district} value={district}>
-                      {district}
-                    </option>
-                  ))}
+                  {districts.length > 0 &&
+                    districts.map((district) => (
+                      <option key={district} value={district}>
+                        {district}
+                      </option>
+                    ))}
                 </InputField>
-                {/* OTP Modal */}
-                {otpModal && (
-                  <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 md:w-1/3">
-                      <h3 className="text-xl text-center mb-4">Enter OTP</h3>
-                      <input
-                        type="text"
-                        placeholder="Enter OTP"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-md mb-4"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleOtpVerification}
-                        className="w-full bg-[#337357] text-white py-2 rounded-md"
-                      >
-                        Verify OTP
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setOtpModal(false)}
-                        className="w-full bg-[#C62E2E] text-white py-2 rounded-md mt-2"
-                      >
-                        Close
-                      </button>
-                    </div>
-                  </div>
-                )}
+
                 {/* Password Field */}
                 <InputField
                   label="Password *"
                   name="accountDetails.password"
                   placeholder="Password"
                   type={showPassword ? "text" : "password"}
-                  value={formData.accountDetails.password}
+                  value={accountDetails.password}
                   handleChange={handleChange}
+                  className="relative"
                 />
                 <span
                   onClick={() => setShowPassword(!showPassword)}
