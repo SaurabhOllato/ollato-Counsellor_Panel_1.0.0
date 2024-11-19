@@ -2,47 +2,9 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const db = require("../config/db"); // Ensure correct path to the db
-
-// // Set up storage engine for multer
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     // Create folders for uploads if they don't exist
-//     const uploadFolder = path.join(__dirname, "../uploads");
-//     console.log(`Checking if upload folder exists at ${uploadFolder}`);
-//     if (!fs.existsSync(uploadFolder)) {
-//       console.log(`Creating upload folder at ${uploadFolder}`);
-//       fs.mkdirSync(uploadFolder);
-//     }
-
-//     const fileTypeFolder = path.join(uploadFolder, file.fieldname);
-//     console.log(`Checking if fileType folder exists at ${fileTypeFolder}`);
-//     if (!fs.existsSync(fileTypeFolder)) {
-//       console.log(`Creating file type folder at ${fileTypeFolder}`);
-//       fs.mkdirSync(fileTypeFolder);
-//     }
-
-//     cb(null, fileTypeFolder); // Specify destination folder for each file
-//   },
-//   filename: (req, file, cb) => {
-//     // Use original name with a timestamp to avoid name conflicts
-//     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-//     const fileName =
-//       file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
-//     console.log(`Saving file as ${fileName}`);
-//     cb(null, fileName);
-//   },
-// });
-
-// // Multer middleware for file uploads
-// const upload = multer({ storage: storage }).fields([
-//   { name: "profile_pic", maxCount: 1 },
-//   { name: "degree_certificate", maxCount: 1 },
-//   { name: "resume", maxCount: 1 },
-//   { name: "aadhar_card_front", maxCount: 1 },
-//   { name: "aadhar_card_back", maxCount: 1 },
-//   { name: "pan_card", maxCount: 1 },
-//   { name: "signature", maxCount: 1 },
-// ]);
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 console.log(path.resolve("uploads"));
 
@@ -199,4 +161,205 @@ const uploadCounsellorDocuments = async (req, res) => {
   }
 };
 
-module.exports = { uploadCounsellorDocuments };
+const addProfessionalDetails = async (req, res) => {
+  const { user_id, license_number, qualification, specification, experience } =
+    req.body;
+
+  // Check for missing required fields
+  if (
+    !user_id ||
+    !license_number ||
+    !qualification ||
+    !specification ||
+    !experience
+  ) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  const query = `
+        INSERT INTO professional_details (user_id, license_number, qualification, specification, experience)
+        VALUES (?, ?, ?, ?, ?)
+    `;
+
+  const values = [
+    user_id,
+    license_number,
+    qualification,
+    specification,
+    experience,
+  ];
+
+  try {
+    const [result] = await db.execute(query, values);
+    res.status(201).json({
+      message: "Professional details added successfully",
+      data: {
+        id: result.insertId,
+        user_id,
+        license_number,
+        qualification,
+        specification,
+        experience,
+      },
+    });
+  } catch (error) {
+    console.error("Error adding professional details:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while adding professional details" });
+  }
+};
+
+// add personal details
+
+const addPersonalDetails = async (req, res) => {
+  const {
+    user_id,
+    first_name,
+    last_name,
+    email,
+    phone_number,
+    gender,
+    date_of_birth,
+    state,
+    district,
+    password,
+    confirm_password,
+  } = req.body;
+
+  // Check for missing required fields
+  if (
+    !user_id ||
+    !first_name ||
+    !last_name ||
+    !email ||
+    !phone_number ||
+    !gender ||
+    !date_of_birth ||
+    !state ||
+    !district ||
+    !password ||
+    !confirm_password
+  ) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  // Check if password and confirm_password match
+  if (password !== confirm_password) {
+    return res.status(400).json({ error: "Passwords do not match" });
+  }
+
+  try {
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert data into the database
+    const query = `
+            INSERT INTO personal_details (
+                user_id, first_name, last_name, email, phone_number, gender, date_of_birth, state, district, password
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+    const values = [
+      user_id,
+      first_name,
+      last_name,
+      email,
+      phone_number,
+      gender,
+      date_of_birth,
+      state,
+      district,
+      hashedPassword,
+    ];
+
+    const [result] = await db.execute(query, values);
+
+    // Respond with success
+    res.status(201).json({
+      message: "Personal details added successfully",
+      data: {
+        id: result.insertId,
+        user_id,
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        gender,
+        date_of_birth,
+        state,
+        district,
+      },
+    });
+  } catch (error) {
+    // Log the error and send an internal server error response
+    console.error("Error adding personal details:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while adding personal details" });
+  }
+};
+
+// login controller
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  // Validate input
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required" });
+  }
+
+  try {
+    // Check if the user exists
+    const query = `SELECT * FROM personal_details WHERE email = ?`;
+    const [rows] = await db.execute(query, [email]);
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "You don't have an account. Please register." });
+    }
+
+    const user = rows[0];
+
+    // Check if the password matches
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Incorrect password" });
+    }
+
+    // Generate a JWT token
+    const token = jwt.sign(
+      { user_id: user.id, email: user.email }, // Payload
+      process.env.JWT_SECRET // Secret key
+    );
+
+    // Log user details to the console
+    console.log(`User Logged In:`, {
+      user_id: user.id,
+      first_name: user.first_name,
+      phone_number: user.phone_number,
+    });
+
+    // Respond with user details and token
+    res.status(200).json({
+      message: "User logged in successfully",
+      token,
+      user: {
+        user_id: user.id,
+        first_name: user.first_name,
+        phone_number: user.phone_number,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ error: "An error occurred during login" });
+  }
+};
+
+module.exports = {
+  uploadCounsellorDocuments,
+  addProfessionalDetails,
+  addPersonalDetails,
+  login,
+};
