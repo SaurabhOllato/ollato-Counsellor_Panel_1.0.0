@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import statesAndDistricts from "../../public/states-and-districts.json";
+import { useUser } from "../context/UserContext";
 
 const Registration = () => {
   const [personalDetails, setPersonalDetails] = useState({
@@ -25,49 +26,59 @@ const Registration = () => {
     confirmPassword: "",
   });
 
-  // const [educationDetails, setEducationDetails] = useState({
-  //   licenseNumber: "",
-  //   qualification: "",
-  //   specialization: "",
-  //   experience: "",
-  //   institutionName: "",
-  // });
+  const [educationDetails, setEducationDetails] = useState({
+    licenseNumber: "",
+    qualification: "",
+    specialization: "",
+    experience: "",
+    institutionName: "",
+  });
 
-  // const [documentation, setDocumentation] = useState({
-  //   degreeCertificate: null,
-  //   resume: null,
-  //   aadharNumber: "",
-  //   aadharFront: null,
-  //   aadharBack: null,
-  //   panNumber: "",
-  //   panCard: null,
-  //   signature: null,
-  //   expertise: {
-  //     careerCounsellor: false,
-  //     psychologist: false,
-  //     groupCounsellor: false,
-  //   },
-  // });
+  const [documentation, setDocumentation] = useState({
+    degreeCertificate: null,
+    resume: null,
+    aadharNumber: "",
+    aadharFront: null,
+    aadharBack: null,
+    panNumber: "",
+    panCard: null,
+    signature: null,
+    expertise: {
+      careerCounsellor: false,
+      psychologist: false,
+      groupCounsellor: false,
+    },
+  });
 
   const [formData, setFormData] = useState({
     personalDetails: personalDetails,
     contactDetails: contactDetails,
     accountDetails: accountDetails,
+    educationDetails: educationDetails,
+    documentation: documentation,
   });
 
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [otpModal, setOtpModal] = useState(false);
-  // const [notification, setNotification] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" }); // New consolidated message state
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [districts, setDistricts] = useState([]);
   const [isVerifying, setIsVerifying] = useState(false);
+  // const [notification, setNotification] = useState("");
+  // const [error, setError] = useState(null);
+
+  const { setProileComplete } = useUser();
+  const steps = [
+    { id: 1, title: "Personal Information" },
+    { id: 2, title: "Educational Information" },
+    { id: 3, title: "Documentation profile" },
+  ];
 
   const navigate = useNavigate();
   const apiBaseUrl = "https://example.com/api"; // Base URL for API
@@ -77,6 +88,15 @@ const Registration = () => {
     setTimeout(() => {
       setMessage({ text: "", type: "" }); // Reset message state after 3 seconds
     }, 3000);
+  };
+
+  const completeStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      setProileComplete(true);
+      navigate("/dashboard");
+    }
   };
 
   // const handleChange = (e) => {
@@ -148,16 +168,68 @@ const Registration = () => {
     }));
   };
 
-  // const handleFileChange = (e) => {
-  //   const { name, files } = e.target;
-  //   setFormData((prev) => ({
-  //     ...prev.documentation,
-  //     [name]: files[0],
-  //   }));
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setFormData((prev) => ({
+      ...prev.documentation,
+      [name]: files[0],
+    }));
+  };
+
+  // const handleNextStep = async () => {
+  //   // if (step < 3) setStep(step + 1);
+  //   if (step === 1) {
+  //     // Ensure personal details are filled and Save Step 1 data to backend (simulated with localStorage)
+
+  //     const { firstName, lastName, gender, birthDate } =
+  //       formData.personalDetails;
+  //     if (!firstName || !lastName || !gender || !birthDate) {
+  //       handlemessage("Please fill in all required fields", "error");
+  //       return;
+  //     }
+  //     // Send personal details to the backend (demo).
+  //     // Assuming there's an API endpoint for adding a new user.
+  //     try {
+  //       const response = await fetch("/api/save-step-1", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ formData }),
+  //       });
+  //       if (response.ok) {
+  //         // console.log("Step 1 data saved successfully");
+  //         handlemessage("Step 1 data saved successfully", "success");
+  //         navigate("/")
+  //       } else {
+  //         // console.log("Failed to save Step 1 data");
+  //         handlemessage("Failed to save Step 1 data", "error");
+  //       }
+  //     } catch (error) {
+  //       handlemessage(error.message, "error");
+  //     }
+  //     // const user = { ...formData.generalDetails, profileComplete: false };
+  //     // localStorage.setItem("user", JSON.stringify(user));
+
+  //     navigate("/");
+  //   } else {
+  //     setStep(step + 1);
+  //   }
   // };
 
-  // const handleNext = () => {
-  //   if (step < 3) setStep(step + 1);
+  //For the sake of simplicity, let's assume we have a function to handle messages
+  // const handleNextStep = async () => {
+  //   if (step === 1) {
+  //     // ensure personal details are filled and save step 1 data to backend (simulated with localStorage)
+  //     const { firstName, lastName, gender, birthDate } =
+  //       formData.personalDetails;
+  //     if (!firstName || !lastName || !gender || !birthDate) {
+  //       handlemessage("Please fill in all required fields", "error");
+  //       return;
+  //     }
+  //     localStorage.setItem("formData", JSON.stringify(formData));
+  //     navigate("/");
+  //   }
   // };
 
   const handleVerifyEmail = () => {
@@ -232,7 +304,7 @@ const Registration = () => {
   // };
 
   const handleOtpVerification = async () => {
-    setNotification(""); // Clear any previous notification before starting
+    // setNotification(""); // Clear any previous notification before starting
     if (!otp || otp.length !== 6) {
       // OTP validation
       // setNotification("Please enter a valid 6-digit OTP.");
@@ -344,9 +416,15 @@ const Registration = () => {
     //   setLoading(false);
     // }
 
-    // Mock API Response
+    // using mock data and local storage for simplicity
+
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    users.push(formData);
+    localStorage.setItem("users", JSON.stringify(users));
+
+    setLoading(false);
+
     setTimeout(() => {
-      setLoading(false);
       handlemessage("Registration successful!", "success");
 
       navigate("/");
@@ -369,65 +447,7 @@ const Registration = () => {
             Welcome to Registration
           </h1>
 
-          {/* {notification && (
-            <div className="text-[#25852a] text-center mb-4">
-              {notification}
-            </div>
-          )}
-          {error && (
-            <div className="text-[#b13e31] text-center mb-4">{error}</div>
-          )} */}
-
-          {/* {notification  */}
-          {/* {notification && (
-            <div className="py-4 bg-[#C4F9E2] text-[#004434] rounded-md flex items-center justify-center text-sm font-medium">
-              <span className="pr-3">
-                <svg
-                  width={20}
-                  height={20}
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx={10} cy={10} r={10} fill="#00B078" />
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M14.1203 6.78954C14.3865 7.05581 14.3865 7.48751 14.1203 7.75378L9.12026 12.7538C8.85399 13.02 8.42229 13.02 8.15602 12.7538L5.88329 10.4811C5.61703 10.2148 5.61703 9.78308 5.88329 9.51682C6.14956 9.25055 6.58126 9.25055 6.84753 9.51682L8.63814 11.3074L13.156 6.78954C13.4223 6.52328 13.854 6.52328 14.1203 6.78954Z"
-                    fill="white"
-                  />
-                </svg>
-              </span>
-              {notification}
-            </div>
-          )} */}
-
-          {/* error */}
-
-          {/* {error && (
-            <div className="py-4 bg-[#F8D7DA] text-[#721C24] rounded-md flex items-center justify-center text-sm font-medium">
-              <span className="pr-3">
-                <svg
-                  width={20}
-                  height={20}
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx={10} cy={10} r={10} fill="#D9534F" />
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M14.1203 6.78954C14.3865 7.05581 14.3865 7.48751 14.1203 7.75378L9.12026 12.7538C8.85399 13.02 8.42229 13.02 8.15602 12.7538L5.88329 10.4811C5.61703 10.2148 5.61703 9.78308 5.88329 9.51682C6.14956 9.25055 6.58126 9.25055 6.84753 9.51682L8.63814 11.3074L13.156 6.78954C13.4223 6.52328 13.854 6.52328 14.1203 6.78954Z"
-                    fill="white"
-                  />
-                </svg>
-              </span>
-              {error}
-            </div>
-          )} */}
-
-          {/*  */}
+          {/* notification and error message */}
           {message.text && (
             <div
               className={`fixed top-24 left-2/3 w-fit transform -translate-x-1/2 z-10 py-4 rounded-md flex items-center justify-center text-md font-medium ${
@@ -463,25 +483,61 @@ const Registration = () => {
               {message.text}
             </div>
           )}
-
-          {/* Step Header */}
-          <div className="flex justify-between mb-4 flex-wrap">
-            {["Personal Details"].map((title, index) => (
-              <span
-                key={index}
-                className={`cursor-pointer ${
-                  step === index + 1 ? "text-[#2C394B]" : "text-gray-400"
-                } font-semibold`}
-                onClick={() => setStep(index + 1)}
-              >
-                {title}
-              </span>
-            ))}
+          {/* progress bar */}
+          <div className="mb-6">
+            <div className="flex items-center">
+              <div className="flex-grow h-1 bg-gray-300">
+                <div
+                  className="h-full bg-[#2C394B]"
+                  style={{
+                    width: `${((currentStep + 1) / steps.length) * 100}%`,
+                  }}
+                />
+              </div>
+              <div className="ml-4 text-gray-600">
+                {currentStep + 1} of {steps.length}
+              </div>
+            </div>
+            <div className="flex justify-between mt-3">
+              {steps.map((step, index) => (
+                <div
+                  key={index}
+                  className={`text-center ${
+                    index <= currentStep ? "text-[#2C394B]" : "text-gray-400"
+                  }`}
+                >
+                  <div>{step.title}</div>
+                  <div
+                    className={`h-1 ${
+                      index <= currentStep ? "bg-[#2C394B]" : "bg-gray-300"
+                    }`}
+                  ></div>
+                </div>
+              ))}
+            </div>
           </div>
+          {/* step head progress bar */}
+          {/* <div className="flex justify-between mb-4 flex-wrap">
+            {["Personal Details", "Education Details", "Document Details"].map(
+              (title, index) => (
+                <span
+                  key={index}
+                  className={`cursor-pointer ${
+                    step === index + 1 ? "text-[#2C394B]" : "text-gray-400"
+                  } font-semibold`}
+                  onClick={() => setStep(index + 1)}
+                >
+                  {title}
+                </span>
+              )
+            )}
+          </div> */}
+
+          {/* Steps form: Render forms based on current step */}
 
           <form onSubmit={handleSubmit}>
             {/* Step 1: Personal Details */}
-            {step === 1 && (
+            {currentStep === 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* First Name */}
                 <InputField
@@ -637,50 +693,194 @@ const Registration = () => {
                     ))}
                 </InputField>
 
-                {/* Password Field */}
-                <InputField
-                  label="Password *"
-                  name="accountDetails.password"
-                  placeholder="Password"
-                  type={showPassword ? "text" : "password"}
-                  value={accountDetails.password}
-                  handleChange={handleChange}
-                  className="relative"
-                />
-                <span
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-5 cursor-pointer"
-                >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
-                </span>
+                <div className="relative">
+                  {/* Password Field */}
+                  <InputField
+                    label="Password *"
+                    name="accountDetails.password"
+                    placeholder="Password"
+                    type={showPassword ? "text" : "password"}
+                    value={accountDetails.password}
+                    handleChange={handleChange}
+                  />
+                  <span
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-9 cursor-pointer"
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </span>
+                </div>
 
-                {/* Confirm Password Field */}
-                <InputField
-                  label="Confirm Password *"
-                  name="accountDetails.confirmPassword"
-                  placeholder="Confirm Password"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={formData.accountDetails.confirmPassword}
-                  handleChange={handleChange}
-                />
-                <span
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-5 cursor-pointer"
+                <div className="relative">
+                  {/* Confirm Password Field */}
+                  <InputField
+                    label="Confirm Password *"
+                    name="accountDetails.confirmPassword"
+                    placeholder="Confirm Password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={formData.accountDetails.confirmPassword}
+                    handleChange={handleChange}
+                  />
+                  <span
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-9 cursor-pointer"
+                  >
+                    {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                  </span>
+                </div>
+                {/*  */}
+                <button
+                  onClick={completeStep}
+                  className="mt-4 bg-[#337357] text-white py-2 px-4 rounded"
                 >
-                  {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
-                </span>
+                  Submit
+                </button>
               </div>
             )}
 
-            {/* Register Button */}
-            <div className="mt-4 flex justify-center">
-              <button
-                type="submit"
-                className="bg-[#2C394B] text-white py-2 px-4 rounded-md"
-              >
-                {loading ? "Registering..." : "Register"}
-              </button>
-            </div>
+            {/* Step 2 : Education details */}
+
+            {currentStep === 1 && (
+              <div>
+                {/* License Number */}
+                <InputField
+                  label="License Number *"
+                  name="educationDetails.licenseNumber"
+                  placeholder="Enter License Number"
+                  value={formData.educationDetails.licenseNumber}
+                  handleChange={handleChange}
+                />
+                {/* Qualification */}
+                <InputField
+                  label="Qualification *"
+                  name="educationDetails.qualification"
+                  placeholder="Enter Qualification"
+                  value={formData.educationDetails.qualification}
+                  handleChange={handleChange}
+                />
+                {/* Specialization */}
+                <InputField
+                  label="Specialization"
+                  name="educationDetails.specialization"
+                  placeholder={"Enter Specialization"}
+                  value={formData.educationDetails.specialization}
+                  handleChange={handleChange}
+                />
+                {/* Experience */}
+                <InputField
+                  label="Experience"
+                  name="educationDetails.experience"
+                  placeholder={"Enter Experience"}
+                  value={formData.educationDetails.experience}
+                  handleChange={handleChange}
+                />
+                <button
+                  onClick={completeStep}
+                  className="mt-4 bg-[#337357] text-white py-2 px-4 rounded"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+
+            {/* Step 3 : Document details */}
+            {currentStep === 2 && (
+              <div className="grid grid-cols-3 gap-4">
+                {/* Documentation Details */}
+                <InputField
+                  label="Upload Profile Picture"
+                  name="documentation.profilePicture"
+                  type="file"
+                  handleChange={handleFileChange}
+                />
+                {/* Degree Certificate */}
+                <InputField
+                  label="Upload Degree Certificate"
+                  name="documentation.degreeCertificate"
+                  type="file"
+                  handleChange={handleFileChange}
+                />
+                {/* Resume */}
+                <InputField
+                  label="Upload Resume"
+                  name="documentation.resume"
+                  type="file"
+                  handleChange={handleFileChange}
+                />
+                {/* Aadhar Number */}
+                <InputField
+                  label="Aadhar Number"
+                  name="documentation.aadharNumber"
+                  placeholder="Enter Aadhar Number"
+                  value={formData.documentation.aadharNumber}
+                  handleChange={handleChange}
+                />
+                {/* Aadhar Card */}
+                <InputField
+                  label="Upload Aadhar Card Front"
+                  name="documentation.aadharFront"
+                  type="file"
+                  handleChange={handleFileChange}
+                />
+                {/* Aadhar Card */}
+                <InputField
+                  label="Upload Aadhar Card Back *"
+                  name="documentation.aadharBack"
+                  type="file"
+                  handleChange={handleFileChange}
+                />
+                {/* PAN Number */}
+                <InputField
+                  label="PAN Number *"
+                  name="documentation.panNumber"
+                  placeholder="Enter PAN Number"
+                  value={formData.documentation.panNumber}
+                  handleChange={handleChange}
+                />
+                {/* PAN Card */}
+                <InputField
+                  label="Upload PAN Card *"
+                  name="documentation.panCard"
+                  type="file"
+                  handleChange={handleFileChange}
+                />
+                {/* Signature */}
+                <InputField
+                  label="Upload Signature *"
+                  name="documentation.signature"
+                  type="file"
+                  handleChange={handleFileChange}
+                />
+                {/* check box */}
+                <InputField
+                  label="professional Expertise"
+                  type="checkbox"
+                  name="professionalExpertise"
+                  options={[
+                    "Career Counsellor",
+                    "Psychologist",
+                    "Group Counsellor",
+                  ]}
+                  handleChange={(e) => {}}
+                ></InputField>
+                {/* Register Button */}
+                <div className="mt-4 flex justify-center">
+                  <button
+                    type="submit"
+                    className="bg-[#2C394B] text-white w-fit h-fit py-2 px-4 rounded-md"
+                  >
+                    {loading ? "Registering..." : "Complete Registeration"}
+                  </button>
+                </div>
+              </div>
+            )}
+            {/* Next Button */}
+            {/* <button
+              className="bg-[#2C394B] text-white py-2 px-4 rounded-md"
+              onClick={handleNextStep}
+            >
+              Next
+            </button> */}
           </form>
           {/* Login Link */}
           <div className="absolute top-6 right-14 flex justify-center items-center mt-4">

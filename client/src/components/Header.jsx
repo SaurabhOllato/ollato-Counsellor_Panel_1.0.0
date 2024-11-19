@@ -1,7 +1,10 @@
 import React from "react";
 import LOGO from "../assets/ollatoLogo.png";
 import { FaUserCog } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 function Header() {
+  const { user, logout, profileComplete } = useUser();
   return (
     <>
       return (
@@ -34,7 +37,7 @@ function Header() {
                 </svg>
               </button>
               {/* Logo */}
-              <a href="" className="flex ms-2 md:me-24">
+              <Link to={"/dashboard"} className="flex ms-2 md:me-24">
                 <img
                   src={LOGO}
                   alt="Logo"
@@ -43,12 +46,12 @@ function Header() {
                 <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white hidden sm:block">
                   Ollato's Mind Mapping
                 </span>
-              </a>
+              </Link>
             </div>
             {/* user profile */}
             <div className="flex items-center gap-4">
               <FaUserCog className="text-2xl text-[#F5F5F5] hidden sm:block" />
-              Amit
+              {user?.email}
             </div>
           </div>
         </div>
