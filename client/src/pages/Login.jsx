@@ -3,8 +3,10 @@ import LOGO from "../assets/ollatoLogo.png";
 import { useNavigate } from "react-router-dom";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import Notification from "../components/Notification/Notification";
+import { useUser } from "../context/UserContext.jsx";
 
-function Login({ setIsLoggedIn }) {
+function Login() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -16,59 +18,29 @@ function Login({ setIsLoggedIn }) {
   const [showOtpLogin, setShowOtpLogin] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null); // To capture success messages
+
   const navigate = useNavigate();
-  
-  console.log("setIsLoggedIn", setIsLoggedIn);
+
+  const [notification, settNotification] = useState({ message: "", type: "" });
+
+  // Function to trigger a notification
+  const triggerNotification = (message, type) => {
+    settNotification({ message, type });
+    setTimeout(() => settNotification({ message: "", type: "" }), 3000);
+  };
+
+  const { login } = useUser(); //use the login function
+
+  // console.log("setIsLoggedIn", setIsLoggedIn);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccessMessage(null); // Clear previous success message
-
-    // if (showOtpLogin) {
-    //   await handleVerifyOtp(); // Handle OTP verification
-    // } else {
-    //   try {
-    //     const response = await fetch("/api/login", {
-    //       method: "POST",
-    //       headers: { "Content-Type": "application/json" },
-    //       body: JSON.stringify({
-    //         email: formData.email,
-    //         password: formData.password,
-    //       }),
-    //     });
-
-    //     if (response.ok) {
-    //       const data = await response.json();
-    //       localStorage.setItem("token", data.token);
-    //       setSuccessMessage("Login successful! Redirecting..."); // Set success message
-    //       navigate("/dashboard"); // Redirect to dashboard after message
-    //     } else {
-    //       const errorData = await response.json();
-    //       setError(errorData.message || "Invalid login credentials.");
-    //     }
-    //   } catch (error) {
-    //     setError("An error occurred while logging in.");
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // }
-    setIsLoggedIn(true);
-    navigate("/dashboard");
-  };
-
   const handleSendOtp = async () => {
     setLoading(true);
-    setError(null);
-    setSuccessMessage(null); // Clear previous success message
+    triggerNotification("OTP sent to your phone number.", "success");
 
     // try {
     //   const response = await fetch("/api/send-otp", {
@@ -90,16 +62,49 @@ function Login({ setIsLoggedIn }) {
     //   setLoading(false);
     // }
 
+    // try {
+    //   // Check for valid phone number format
+    //   if (/^\d{10}$/.test(formData.phoneNumber)) {
+    //     // Assuming OTP Sending logic
+    //     const response = await fetch("/api/send-otp", {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify({ phoneNumber: formData.phoneNumber }),
+    //     });
+
+    //     if (response.ok) {
+    //       setOtpSent(true);
+    //       triggerNotification("OTP sent to your phone number.", "success");
+    //     } else {
+    //       const errorData = await response.json();
+    //       triggerNotification(
+    //         errorData.message || "Failed to send OTP.",
+    //         "error"
+    //       );
+    //     }
+    //   } else {
+    //     triggerNotification("Invalid phone number.", "error");
+    //   }
+    // } catch (error) {
+    //   triggerNotification("An error occurred while sending OTP.", "error");
+    // } finally {
+    //   setLoading(false);
+    // }
+
+    // Check for valid phone number format (10 digits)
     if (formData.phoneNumber.length === 10) {
       setOtpSent(true);
-      setSuccessMessage("OTP sent to your phone number."); // Set success message
+      triggerNotification("OTP sent to your phone number.", "success");
     }
   };
 
   const handleVerifyOtp = async () => {
     setLoading(true);
-    setError(null);
-    setSuccessMessage(null); // Clear previous success message
+    triggerNotification("Login successful! Redirecting...", "success");
+    // setError(null);
+    // setSuccessMessage(null); // Clear previous success message
 
     // try {
     //   const response = await fetch("/api/verify-otp", {
@@ -133,12 +138,80 @@ function Login({ setIsLoggedIn }) {
     setShowOtpLogin(!showOtpLogin);
     setOtpSent(false);
     setFormData({ email: "", password: "", phoneNumber: "", otp: "" });
-    setError(null);
-    setSuccessMessage(null); // Clear message on toggle
+    // triggerNotification("Login method toggled.", "success");
+    // setError(null);
+    // setSuccessMessage(null); // Clear message on toggle
   };
 
   const handleForgotPassword = () => {
     navigate("/forgot-password");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    // setError(null);
+    // setSuccessMessage(null); // Clear previous success message
+
+    // if (showOtpLogin) {
+    //   await handleVerifyOtp(); // Handle OTP verification
+    // } else {
+    //   try {
+    //     const response = await fetch("/api/login", {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({
+    //         email: formData.email,
+    //         password: formData.password,
+    //       }),
+    //     });
+
+    //     if (response.ok) {
+    //       const data = await response.json();
+    //       localStorage.setItem("token", data.token);
+    //       setSuccessMessage("Login successful! Redirecting..."); // Set success message
+    //        triggerNotification("Login successful! Redirecting...", "success"); // Set success message
+    //       navigate("/dashboard"); // Redirect to dashboard after message
+    //     } else {
+    //       const errorData = await response.json();
+    //       setError(errorData.message || "Invalid login credentials.");
+    //     }
+    //   } catch (error) {
+    //     setError("An error occurred while logging in.");
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // }
+
+    // const savedUser = JSON.parse(localStorage.getItem("user"));
+    // if (
+    //   savedUser &&
+    //   savedUser.email === formData.email &&
+    //   savedUser.password === formData.password
+    // ) {
+    //   login(savedUser); // set the user in the context
+    //   navigate("/dashboard");
+    //   triggerNotification("Login successful! Redirecting...", "success");
+    // } else {
+    //   triggerNotification("Invalid login credentials.", "error");
+    // }
+
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const user = users.find(
+      (u) => u.email === email && u.password === password
+    );
+    if (user) {
+      triggerNotification("Login successful! Redirecting...", "success");
+    } else {
+      triggerNotification("Invalid login credentials.", "error"); // Set error message
+    }
+
+    console.log("formData", formData);
+    // Instead of authenticating against a backend, we are logging the form data directly
+    login(formData);
+    navigate("/dashboard");
+
+    setLoading(false);
   };
 
   return (
@@ -153,18 +226,22 @@ function Login({ setIsLoggedIn }) {
             {showOtpLogin ? "Login with OTP" : "Welcome Back"}
           </h1>
           {/* Error message */}
-          {error && (
+          {/* {error && (
             <div className="text-[#c93434] text-center mt-4 border border-[#c93434] mb-6 p-2 rounded shadow-lg bg-[#f6f6f6]">
               {error}
             </div>
-          )}
+          )} */}
           {/* Success message */}
-          {successMessage && (
+          {/* {successMessage && (
             <div className="text-[#2c7525] text-center mt-4 border border-[#2c7525] mb-6 p-2 rounded shadow-lg bg-[#f6f6f6]">
               {successMessage}
             </div>
-          )}
+          )} */}
 
+          <Notification
+            message={notification.message}
+            type={notification.type}
+          />
           <form onSubmit={handleSubmit}>
             {showOtpLogin ? (
               <>

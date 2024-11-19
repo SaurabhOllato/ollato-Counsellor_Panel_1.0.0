@@ -3,6 +3,7 @@ import LOGO from "../assets/ollatoLogo.png";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
+import Notification from "./Notification/Notification";
 
 function ForgotPassword() {
   const [formData, setFormData] = useState({
@@ -16,9 +17,16 @@ function ForgotPassword() {
   const [otpSent, setOtpSent] = useState(false); // Set otpSent to true initially
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
+  // const [error, setError] = useState(null);
+  // const [successMessage, setSuccessMessage] = useState(null);
   const navigate = useNavigate();
+
+  const [notification, settNotification] = useState({ message: "", type: "" });
+
+  const triggerNotification = (message, type) => {
+    settNotification({ message, type });
+    setTimeout(() => settNotification({ message: "", type: "" }), 3000);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,7 +36,7 @@ function ForgotPassword() {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    // setError(null);
 
     // try {
     //   const response = await fetch("/api/send-otp", {
@@ -40,9 +48,11 @@ function ForgotPassword() {
     //   if (response.ok) {
     //     setOtpSent(true);
     //     setSuccessMessage("OTP sent to your email.");
+    //      triggerNotification("OTP sent to your email.", "success");
     //   } else {
     //     const errorData = await response.json();
     //     setError(errorData.message || "Failed to send OTP.");
+    //  triggerNotification("OTP sent to your email.", "error");
     //   }
     // } catch (error) {
     //   setError("An error occurred while sending OTP.");
@@ -50,13 +60,14 @@ function ForgotPassword() {
     //   setLoading(false);
     // }
     setOtpSent(true);
-    setSuccessMessage("OTP sent to your email.");
+    // setSuccessMessage("OTP sent to your email.");
+    triggerNotification("OTP sent to your email.", "success");
   };
 
   const handleVerifyOtpAndUpdatePassword = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    // setError(null);
 
     if (formData.newPassword !== formData.confirmPassword) {
       setError("Passwords do not match.");
@@ -92,8 +103,11 @@ function ForgotPassword() {
     //   setLoading(false);
     // }
 
-    setSuccessMessage("Password updated successfully! Redirecting to login...");
-
+    // setSuccessMessage("Password updated successfully! Redirecting to login...");
+    triggerNotification(
+      "Password updated successfully! Redirecting to login...",
+      "success"
+    );
   };
 
   return (
@@ -108,7 +122,11 @@ function ForgotPassword() {
             Forgot Password
           </h1>
 
-          {successMessage && (
+          <Notification
+            message={notification.message}
+            type={notification.type}
+          />
+          {/* {successMessage && (
             <div className="text-[#267c47] text-center mb-4">
               {successMessage}
             </div>
@@ -116,7 +134,7 @@ function ForgotPassword() {
 
           {error && (
             <div className="text-[#cf3f3f] text-center mb-4">{error}</div>
-          )}
+          )} */}
 
           {/* Conditional rendering based on OTP sent */}
           {otpSent ? (
@@ -233,6 +251,17 @@ function ForgotPassword() {
               </div>
             </form>
           )}
+          {/* Login Link */}
+          <div className="absolute top-6 right-14 flex justify-center items-center mt-4">
+            <p className="text-sm text-[#2C394B]">Back to Login?</p>
+            <button
+              className="ml-2 text-md text-[#2C394B] hover:text-[#597aac] hover:translate-x-1 transition duration-200 ease-in-out flex items-center gap-1"
+              onClick={() => navigate("/")}
+            >
+              <FaArrowRightFromBracket />
+              Login
+            </button>
+          </div>
         </div>
       </div>
     </div>
