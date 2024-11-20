@@ -1,16 +1,21 @@
 import { useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import { UserProvider } from "./context/UserContext.jsx";
+import { useUser } from "./context/UserContext.jsx";
+
 import Registration from "./pages/Registration";
 import Login from "./pages/Login";
 import ForgotPassword from "./components/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./Layout";
-import { UserProvider } from "./context/UserContext.jsx";
-import { useUser } from "./context/UserContext.jsx";
+import ErrorPage from "./error-page.jsx";
 function App() {
   // Mock authentication state
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // console.log(import.meta.env.VITE_PERSONAL_DELAILS_API);
 
   // Private route wrapper
   const PrivateRoute = ({ children }) => {
@@ -23,9 +28,17 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* public routes */}
-          <Route path="/" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/registration" element={<Registration />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/" element={<Login />} errorElement={<ErrorPage />} />
+          <Route
+            path="/registration"
+            element={<Registration />}
+            errorElement={<ErrorPage />}
+          />
+          <Route
+            path="/forgot-password"
+            element={<ForgotPassword />}
+            ErrorBoundary={ErrorBoundary}
+          />
           {/* <Route path="/dashboard" element={<Dashboard />} /> */}
 
           {/* private routes */}
@@ -39,11 +52,18 @@ function App() {
                 </Layout>
               </PrivateRoute>
             }
+            errorElement={<ErrorPage />}
           />
+          
         </Routes>
       </BrowserRouter>
     </UserProvider>
   );
+}
+function ErrorBoundary() {
+  const error = useRouteError();
+  console.error(error);
+  return <div>{error.message}</div>;
 }
 
 export default App;

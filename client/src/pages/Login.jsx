@@ -22,6 +22,12 @@ function Login() {
   const navigate = useNavigate();
 
   const [notification, settNotification] = useState({ message: "", type: "" });
+  const login_Url = import.meta.env.VITE_LOGIN_API;
+  const send_mobile_otp_Url = import.meta.env.VITE_SEND_MOBILE_OTP_API;
+  const verify_mobile_otp_Url = import.meta.env.VITE_VERIFY_MOBILE_OTP_API;
+  const send_email_otp_url = import.meta.env.VITE_SEND_EMAIL_OTP_API;
+  const verify_email_otp_url = import.meta.env.VITE_VERIFY_EMAIL_OTP_API;
+  const verify_login_otp_Url = "";
 
   // Function to trigger a notification
   const triggerNotification = (message, type) => {
@@ -62,36 +68,36 @@ function Login() {
     //   setLoading(false);
     // }
 
-    // try {
-    //   // Check for valid phone number format
-    //   if (/^\d{10}$/.test(formData.phoneNumber)) {
-    //     // Assuming OTP Sending logic
-    //     const response = await fetch("/api/send-otp", {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify({ phoneNumber: formData.phoneNumber }),
-    //     });
+    try {
+      // Check for valid phone number format
+      if (/^\d{10}$/.test(formData.phoneNumber)) {
+        // Assuming OTP Sending logic
+        const response = await fetch(send_mobile_otp_Url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ phoneNumber: formData.phoneNumber }),
+        });
 
-    //     if (response.ok) {
-    //       setOtpSent(true);
-    //       triggerNotification("OTP sent to your phone number.", "success");
-    //     } else {
-    //       const errorData = await response.json();
-    //       triggerNotification(
-    //         errorData.message || "Failed to send OTP.",
-    //         "error"
-    //       );
-    //     }
-    //   } else {
-    //     triggerNotification("Invalid phone number.", "error");
-    //   }
-    // } catch (error) {
-    //   triggerNotification("An error occurred while sending OTP.", "error");
-    // } finally {
-    //   setLoading(false);
-    // }
+        if (response.ok) {
+          setOtpSent(true);
+          triggerNotification("OTP sent to your phone number.", "success");
+        } else {
+          const errorData = await response.json();
+          triggerNotification(
+            errorData.message || "Failed to send OTP.",
+            "error"
+          );
+        }
+      } else {
+        triggerNotification("Invalid phone number.", "error");
+      }
+    } catch (error) {
+      triggerNotification("An error occurred while sending OTP.", "error");
+    } finally {
+      setLoading(false);
+    }
 
     // Check for valid phone number format (10 digits)
     if (formData.phoneNumber.length === 10) {
@@ -107,7 +113,7 @@ function Login() {
     // setSuccessMessage(null); // Clear previous success message
 
     // try {
-    //   const response = await fetch("/api/verify-otp", {
+    //   const response = await fetch(verify_login_otp_Url, {
     //     method: "POST",
     //     headers: { "Content-Type": "application/json" },
     //     body: JSON.stringify({
@@ -153,35 +159,35 @@ function Login() {
     // setError(null);
     // setSuccessMessage(null); // Clear previous success message
 
-    // if (showOtpLogin) {
-    //   await handleVerifyOtp(); // Handle OTP verification
-    // } else {
-    //   try {
-    //     const response = await fetch("/api/login", {
-    //       method: "POST",
-    //       headers: { "Content-Type": "application/json" },
-    //       body: JSON.stringify({
-    //         email: formData.email,
-    //         password: formData.password,
-    //       }),
-    //     });
+    if (showOtpLogin) {
+      await handleVerifyOtp(); // Handle OTP verification
+    } else {
+      try {
+        const response = await fetch(login_Url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
 
-    //     if (response.ok) {
-    //       const data = await response.json();
-    //       localStorage.setItem("token", data.token);
-    //       setSuccessMessage("Login successful! Redirecting..."); // Set success message
-    //        triggerNotification("Login successful! Redirecting...", "success"); // Set success message
-    //       navigate("/dashboard"); // Redirect to dashboard after message
-    //     } else {
-    //       const errorData = await response.json();
-    //       setError(errorData.message || "Invalid login credentials.");
-    //     }
-    //   } catch (error) {
-    //     setError("An error occurred while logging in.");
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // }
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem("token", data.token);
+          setSuccessMessage("Login successful! Redirecting..."); // Set success message
+          triggerNotification("Login successful! Redirecting...", "success"); // Set success message
+          navigate("/dashboard"); // Redirect to dashboard after message
+        } else {
+          const errorData = await response.json();
+          setError(errorData.message || "Invalid login credentials.");
+        }
+      } catch (error) {
+        setError("An error occurred while logging in.");
+      } finally {
+        setLoading(false);
+      }
+    }
 
     // const savedUser = JSON.parse(localStorage.getItem("user"));
     // if (
@@ -196,22 +202,22 @@ function Login() {
     //   triggerNotification("Invalid login credentials.", "error");
     // }
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    const user = users.find(
-      (u) => u.email === email && u.password === password
-    );
-    if (user) {
-      triggerNotification("Login successful! Redirecting...", "success");
-    } else {
-      triggerNotification("Invalid login credentials.", "error"); // Set error message
-    }
+    // const users = JSON.parse(localStorage.getItem("users")) || [];
+    // const user = users.find(
+    //   (u) => u.email === email && u.password === password
+    // );
+    // if (user) {
+    //   triggerNotification("Login successful! Redirecting...", "success");
+    // } else {
+    //   triggerNotification("Invalid login credentials.", "error"); // Set error message
+    // }
 
-    console.log("formData", formData);
-    // Instead of authenticating against a backend, we are logging the form data directly
-    login(formData);
-    navigate("/dashboard");
+    // console.log("formData", formData);
+    // // Instead of authenticating against a backend, we are logging the form data directly
+    // login(formData);
+    // navigate("/dashboard");
 
-    setLoading(false);
+    // setLoading(false);
   };
 
   return (
