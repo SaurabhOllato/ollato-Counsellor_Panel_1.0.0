@@ -2,9 +2,9 @@ import React from "react";
 import LOGO from "../assets/ollatoLogo.png";
 import { FaUserCog } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { useUser } from "../context/UserContext";
+import { useAuth } from "../context/UserContext";
 function Header() {
-  const { user, logout, profileComplete } = useUser();
+  const { user, logout, profileComplete } = useAuth();
   return (
     <>
       return (

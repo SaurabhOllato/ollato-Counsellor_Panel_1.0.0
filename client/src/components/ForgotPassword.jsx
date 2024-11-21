@@ -14,100 +14,108 @@ function ForgotPassword() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false); // Set otpSent to true initially
+  const [otpSent, setOtpSent] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  // const [error, setError] = useState(null);
-  // const [successMessage, setSuccessMessage] = useState(null);
+
+  const [notification, setNotification] = useState({ message: "", type: "" });
+
   const navigate = useNavigate();
 
-  const [notification, settNotification] = useState({ message: "", type: "" });
-
-  const triggerNotification = (message, type) => {
-    settNotification({ message, type });
-    setTimeout(() => settNotification({ message: "", type: "" }), 3000);
+  const apiUrls = {
+    sendOtp: import.meta.env.VITE_SEND_OTP_API,
+    verifyOtpAndResetPassword: import.meta.env
+      .VITE_VERIFY_OTP_RESET_PASSWORD_API,
   };
 
+  // Function to trigger a notification
+  const triggerNotification = (message, type) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification({ message: "", type: "" }), 3000);
+  };
+
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Send OTP
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // setError(null);
+    try {
+      const response = await fetch(apiUrls.sendOtp, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      });
 
-    // try {
-    //   const response = await fetch("/api/send-otp", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ email: formData.email }),
-    //   });
-
-    //   if (response.ok) {
-    //     setOtpSent(true);
-    //     setSuccessMessage("OTP sent to your email.");
-    //      triggerNotification("OTP sent to your email.", "success");
-    //   } else {
-    //     const errorData = await response.json();
-    //     setError(errorData.message || "Failed to send OTP.");
-    //  triggerNotification("OTP sent to your email.", "error");
-    //   }
-    // } catch (error) {
-    //   setError("An error occurred while sending OTP.");
-    // } finally {
-    //   setLoading(false);
-    // }
-    setOtpSent(true);
-    // setSuccessMessage("OTP sent to your email.");
-    triggerNotification("OTP sent to your email.", "success");
+      if (response.ok) {
+        setOtpSent(true);
+        triggerNotification("OTP sent to your email.", "success");
+      } else {
+        const errorData = await response.json();
+        triggerNotification(
+          errorData.message || "Failed to send OTP.",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      triggerNotification(
+        "An error occurred while sending OTP. Please try again.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Verify OTP and Reset Password
   const handleVerifyOtpAndUpdatePassword = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // setError(null);
 
     if (formData.newPassword !== formData.confirmPassword) {
-      setError("Passwords do not match.");
+      triggerNotification("Passwords do not match.", "error");
       setLoading(false);
       return;
     }
 
-    // try {
-    //   const response = await fetch("/api/reset-password", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({
-    //       email: formData.email,
-    //       otp: formData.otp,
-    //       newPassword: formData.newPassword,
-    //     }),
-    //   });
+    try {
+      const response = await fetch(apiUrls.verifyOtpAndResetPassword, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          otp: formData.otp,
+          newPassword: formData.newPassword,
+        }),
+      });
 
-    //   if (response.ok) {
-    //     setSuccessMessage(
-    //       "Password updated successfully! Redirecting to login..."
-    //     );
-    //     setTimeout(() => {
-    //       navigate("/login");
-    //     }, 3000);
-    //   } else {
-    //     const errorData = await response.json();
-    //     setError(errorData.message || "Failed to reset password.");
-    //   }
-    // } catch (error) {
-    //   setError("An error occurred while resetting the password.");
-    // } finally {
-    //   setLoading(false);
-    // }
-
-    // setSuccessMessage("Password updated successfully! Redirecting to login...");
-    triggerNotification(
-      "Password updated successfully! Redirecting to login...",
-      "success"
-    );
+      if (response.ok) {
+        triggerNotification(
+          "Password updated successfully! Redirecting to login...",
+          "success"
+        );
+        setTimeout(() => navigate("/"), 3000); // Redirect to login after success
+      } else {
+        const errorData = await response.json();
+        triggerNotification(
+          errorData.message || "Failed to reset password.",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      triggerNotification(
+        "An error occurred while resetting the password. Please try again.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -126,17 +134,7 @@ function ForgotPassword() {
             message={notification.message}
             type={notification.type}
           />
-          {/* {successMessage && (
-            <div className="text-[#267c47] text-center mb-4">
-              {successMessage}
-            </div>
-          )}
 
-          {error && (
-            <div className="text-[#cf3f3f] text-center mb-4">{error}</div>
-          )} */}
-
-          {/* Conditional rendering based on OTP sent */}
           {otpSent ? (
             <form onSubmit={handleVerifyOtpAndUpdatePassword}>
               <div className="mb-4">
@@ -214,6 +212,7 @@ function ForgotPassword() {
             </form>
           ) : (
             <form onSubmit={handleSendOtp}>
+              {/* email */}
               <div className="mb-4">
                 <label className="block text-gray-600">Email *</label>
                 <input
@@ -226,7 +225,7 @@ function ForgotPassword() {
                   required
                 />
               </div>
-
+              {/* send otp */}
               <div className="mt-4 flex justify-center">
                 <button
                   type="submit"
@@ -238,7 +237,7 @@ function ForgotPassword() {
                   {loading ? "Sending OTP..." : "Send OTP"}
                 </button>
               </div>
-
+              {/* back to login */}
               <div className="absolute top-6 right-14 flex justify-center items-center mt-4">
                 <p className="text-sm text-[#2C394B]">Back to Login?</p>
                 <button
@@ -251,17 +250,6 @@ function ForgotPassword() {
               </div>
             </form>
           )}
-          {/* Login Link */}
-          <div className="absolute top-6 right-14 flex justify-center items-center mt-4">
-            <p className="text-sm text-[#2C394B]">Back to Login?</p>
-            <button
-              className="ml-2 text-md text-[#2C394B] hover:text-[#597aac] hover:translate-x-1 transition duration-200 ease-in-out flex items-center gap-1"
-              onClick={() => navigate("/")}
-            >
-              <FaArrowRightFromBracket />
-              Login
-            </button>
-          </div>
         </div>
       </div>
     </div>

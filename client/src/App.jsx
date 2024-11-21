@@ -3,7 +3,7 @@ import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { UserProvider } from "./context/UserContext.jsx";
-import { useUser } from "./context/UserContext.jsx";
+import { useAuth } from "./context/UserContext.jsx";
 
 import Registration from "./pages/Registration";
 import Login from "./pages/Login";
@@ -19,7 +19,7 @@ function App() {
 
   // Private route wrapper
   const PrivateRoute = ({ children }) => {
-    const { user } = useUser();
+    const { user } = useAuth();
     return user ? children : <Navigate to="/" />;
   };
 

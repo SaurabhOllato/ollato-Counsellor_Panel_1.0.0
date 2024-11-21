@@ -226,6 +226,7 @@ const addPersonalDetails = async (req, res) => {
     password,
     confirm_password,
   } = req.body;
+  console.log("personal details", req.body);
 
   // Check for missing required fields
   if (

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { useUser } from "../context/UserContext";
+import { useAuth } from "../context/UserContext";
 import { HiOutlineLogout } from "react-icons/hi";
 import Notification from "./Notification/Notification";
 
 function Sidebar() {
-  const { profileComplete, logout } = useUser();
+  const { profileComplete, logout } = useAuth();
   const [notification, setNotification] = useState({ message: "", type: "" });
   const triggerNotification = (message, type) => {
     setNotification({ message, type });
