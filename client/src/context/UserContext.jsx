@@ -1,7 +1,14 @@
 import React, { createContext, useState, useContext } from "react";
 
 // Create the User Context
-const UserContext = createContext();
+const UserContext = createContext({
+  user: null,
+  setUser: () => {},
+  profileComplete: false,
+  setProfileComplete: () => {},
+  login: () => {},
+  logout: () => {},
+});
 
 // Create the UserProvider component
 
@@ -11,7 +18,7 @@ export const UserProvider = ({ children }) => {
 
   const login = (userData) => {
     setUser(userData);
-    setProfileComplete(userData.profileComplete || false);
+    setProfileComplete(userData?.profileComplete || false);
     localStorage.setItem("user", JSON.stringify(userData)); // Save userData directly
   };
 
@@ -38,4 +45,4 @@ export const UserProvider = ({ children }) => {
 };
 
 // custom hook to access the UserContext
-export const useUser = () => useContext(UserContext);
+export const useAuth = () => useContext(UserContext);

@@ -10,7 +10,7 @@ const OTP_EXPIRATION_TIME = 1 * 60 * 1000; // OTP expires after 5 minutes
 // Generate and send OTP
 exports.sendOtp = async (req, res) => {
   let { phoneNumber } = req.body;
-  console.log(phoneNumber);
+  console.log("Phone Number",phoneNumber);
 
   if (!phoneNumber) {
     return res.status(400).json({ message: "Phone number is required." });

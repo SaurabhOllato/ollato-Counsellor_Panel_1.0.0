@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import LOGO from "../assets/ollatoLogo.png";
-import { useUser } from "../context/UserContext";
+import { useAuth } from "../context/UserContext";
 import Notification from "../components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  const { user, profileComplete, setProfileComplete, logout } = useUser();
+  const { user, profileComplete, setProfileComplete, logout } = useAuth();
   const [notification, setNotification] = useState({ message: "", type: "" });
   const navigate = useNavigate();
   // console.log("User", user);

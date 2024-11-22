@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import statesAndDistricts from "../../public/states-and-districts.json";
-import { useUser } from "../context/UserContext";
+import { useAuth } from "../context/UserContext";
 
 const Registration = () => {
+  // State management
   const [personalDetails, setPersonalDetails] = useState({
     firstName: "",
     lastName: "",
@@ -51,395 +52,538 @@ const Registration = () => {
   });
 
   const [formData, setFormData] = useState({
-    personalDetails: personalDetails,
-    contactDetails: contactDetails,
-    accountDetails: accountDetails,
-    educationDetails: educationDetails,
-    documentation: documentation,
+    personalDetails,
+    contactDetails,
+    accountDetails,
+    educationDetails,
+    documentation,
   });
 
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState(1);
-  const [currentStep, setCurrentStep] = useState(0);
-
+  const [currentStep, setCurrentStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [otpModal, setOtpModal] = useState(false);
-  const [message, setMessage] = useState({ text: "", type: "" }); // New consolidated message state
-
+  const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
   const [districts, setDistricts] = useState([]);
   const [isVerifying, setIsVerifying] = useState(false);
-  // const [notification, setNotification] = useState("");
-  // const [error, setError] = useState(null);
+  const [otpType, setOtpType] = useState(""); // 'email' or 'phone' to track the OTP type
+  const [stepLocked, setStepLocked] = useState(false);
 
-  const { setProileComplete } = useUser();
+  const { setProfileComplete } = useAuth();
+  const navigate = useNavigate();
   const steps = [
     { id: 1, title: "Personal Information" },
-    { id: 2, title: "Educational Information" },
-    { id: 3, title: "Documentation profile" },
+    { id: 2, title: "Professional Information" },
+    { id: 3, title: "Documentation Profile" },
   ];
 
-  const navigate = useNavigate();
-  const apiBaseUrl = "https://example.com/api"; // Base URL for API
-
-  const handlemessage = (text, type) => {
-    setMessage({ text, type }); // Update message state with text and type
-    setTimeout(() => {
-      setMessage({ text: "", type: "" }); // Reset message state after 3 seconds
-    }, 3000);
+  // API URLs
+  const apiUrls = {
+    personalDetails: import.meta.env.VITE_PERSONAL_DELAILS_API,
+    professionalDetails: import.meta.env.VITE_PROFESSIONAL_DELAILS_API,
+    documentation: import.meta.env.VITE_DOCUMENTS_UPLOAD_API,
+    sendOtp: {
+      email: import.meta.env.VITE_SEND_EMAIL_OTP_API,
+      phone: import.meta.env.VITE_SEND_MOBILE_OTP_API,
+    },
+    verifyOtp: {
+      email: import.meta.env.VITE_VERIFY_EMAIL_OTP_API,
+      phone: import.meta.env.VITE_VERIFY_MOBILE_OTP_API,
+    },
   };
 
+  // Calculate progress based on currentStep and total steps
+  const progressPercentage = (currentStep / steps.length) * 100;
+
+  const handleStepClick = (stepId) => {
+    if (stepId <= currentStep) {
+      // Allow only clicking completed or current steps
+      setCurrentStep(stepId);
+    }
+  };
+
+  // Message handler function
+  const handleMessage = (text, type) => {
+    setMessage({ text, type });
+    setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+  };
+
+  // Step completion logic
   const completeStep = () => {
-    if (currentStep < steps.length - 1) {
+    if (currentStep === 1) {
+      setStepLocked(true); // Lock data after Step 1 submission
+    }
+
+    if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     } else {
-      setProileComplete(true);
+      setProfileComplete(true);
       navigate("/dashboard");
     }
   };
 
-  // const handleChange = (e) => {
-  //   const { name, type, checked, value } = e.target;
-
-  //   setFormData({
-  //     ...formData,
-  //     [name]: type === "checkbox" ? checked : value,
-  //   });
-  // };
-
+  // Input handler logic
   const handleChange = (e) => {
+    if (stepLocked) return; // Prevent changes if step is locked
     const { name, value } = e.target;
+    const keys = name.split("."); // Handle nested state updates
 
-    // Split the nested key (e.g., "personalDetails.firstName")
-    const keys = name.split(".");
-
-    // Use a functional state update to handle immutability
     setFormData((prevState) => {
-      let newState = { ...prevState };
+      const newState = { ...prevState };
       let current = newState;
 
-      // Navigate to the nested key
-      for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]];
-      }
+      // Navigate to the corresponding nested keys
+      keys.slice(0, -1).forEach((key) => {
+        current = current[key];
+      });
 
-      // Update the value at the nested key
+      // Update the corresponding value
       current[keys[keys.length - 1]] = value;
-
       return newState;
     });
   };
 
+  // Change handler for state select
   const handleStateChange = (e) => {
     const selectedState = e.target.value;
-
-    // Find the selected state's data
     const selectedStateData = statesAndDistricts.states.find(
       (s) => s.state === selectedState
     );
 
-    // Update the formData with the selected state and clear the district (city)
     setFormData((prevData) => ({
       ...prevData,
       contactDetails: {
         ...prevData.contactDetails,
         state: selectedState,
-        city: "", // Clear city (district) when state changes
+        city: "", // Clear city when state changes
       },
     }));
 
-    // Update the districts based on the selected state
     setDistricts(selectedStateData ? selectedStateData.districts : []);
   };
 
+  // District change handler
   const handleDistrictChange = (e) => {
     const selectedDistrict = e.target.value;
 
-    // console.log("Selected District:", selectedDistrict);
-
-    // Update the formData with the selected district (city)
     setFormData((prevData) => ({
       ...prevData,
       contactDetails: {
         ...prevData.contactDetails,
-        city: selectedDistrict, // Ensure city (district) is set correctly
+        city: selectedDistrict,
       },
     }));
   };
 
+  // File change handler for document uploads
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     setFormData((prev) => ({
-      ...prev.documentation,
-      [name]: files[0],
+      ...prev,
+      documentation: {
+        ...prev.documentation,
+        [name]: files[0],
+      },
     }));
   };
 
-  // const handleNextStep = async () => {
-  //   // if (step < 3) setStep(step + 1);
-  //   if (step === 1) {
-  //     // Ensure personal details are filled and Save Step 1 data to backend (simulated with localStorage)
-
-  //     const { firstName, lastName, gender, birthDate } =
-  //       formData.personalDetails;
-  //     if (!firstName || !lastName || !gender || !birthDate) {
-  //       handlemessage("Please fill in all required fields", "error");
-  //       return;
-  //     }
-  //     // Send personal details to the backend (demo).
-  //     // Assuming there's an API endpoint for adding a new user.
-  //     try {
-  //       const response = await fetch("/api/save-step-1", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({ formData }),
-  //       });
-  //       if (response.ok) {
-  //         // console.log("Step 1 data saved successfully");
-  //         handlemessage("Step 1 data saved successfully", "success");
-  //         navigate("/")
-  //       } else {
-  //         // console.log("Failed to save Step 1 data");
-  //         handlemessage("Failed to save Step 1 data", "error");
-  //       }
-  //     } catch (error) {
-  //       handlemessage(error.message, "error");
-  //     }
-  //     // const user = { ...formData.generalDetails, profileComplete: false };
-  //     // localStorage.setItem("user", JSON.stringify(user));
-
-  //     navigate("/");
-  //   } else {
-  //     setStep(step + 1);
-  //   }
-  // };
-
-  //For the sake of simplicity, let's assume we have a function to handle messages
-  // const handleNextStep = async () => {
-  //   if (step === 1) {
-  //     // ensure personal details are filled and save step 1 data to backend (simulated with localStorage)
-  //     const { firstName, lastName, gender, birthDate } =
-  //       formData.personalDetails;
-  //     if (!firstName || !lastName || !gender || !birthDate) {
-  //       handlemessage("Please fill in all required fields", "error");
-  //       return;
-  //     }
-  //     localStorage.setItem("formData", JSON.stringify(formData));
-  //     navigate("/");
-  //   }
-  // };
-
+  // Email verification handler
   const handleVerifyEmail = () => {
-    if (!contactDetails.email) {
-      // setNotification("Please enter an email address.");
-      handlemessage("Please enter an email address.", "error");
+    if (!formData.contactDetails.email) {
+      handleMessage("Please enter an email address.", "error");
       return;
     }
-    sendOtp("email");
-    // setOtpModal(true);
+    // sendOtp("email", formData.contactDetails.email);
+    sendEmailOtp(formData.contactDetails.email);
+    setOtpType("email"); // Track OTP type as email
   };
 
+  // Phone verification handler
   const handleVerifyPhone = () => {
     if (!contactDetails.phone) {
-      // setNotification("Please enter a phone number.");
-      handlemessage("Please enter a phone number.", "error");
+      handleMessage("Please enter a phone number.", "error");
       return;
     }
-    sendOtp("phone");
-    // setOtpModal(true);
+    // sendOtp("phone", contactDetails.phone);
+    sendPhoneOtp(formData.contactDetails.phone); // Send OTP for phone
+    setOtpType("phone"); // Track OTP type as phone
   };
 
-  const sendOtp = async (type) => {
-    // try {
-    //   const response = await fetch(`${apiBaseUrl}/send-otp`, {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ type }), // Pass the type to the API (either "email" or "phone") *** change accordingly ***
-    //   });
-    //   if (response.ok) {
-    //     setOtpField(type);
-    //     setNotification("OTP sent successfully!");
-    //     setOtpModal(true);
-    //   } else {
-    //     throw new Error("Failed to send OTP");
-    //   }
-    // } catch (error) {
-    //   console.error("Error sending OTP:", error);
-    //   setNotification("Error sending OTP. Please try again.");
-    // }
-    // mockOTP sending
-    // setNotification("OTP sent successfully!");
-    handlemessage("OTP sent successfully!", "success");
-    setOtpModal(true);
+  // Function to send OTP for email
+  const sendEmailOtp = async (email) => {
+    const url = apiUrls.sendOtp.email; // API URL for email OTP
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }), // Send only email
+      });
+
+      if (response.ok) {
+        handleMessage("OTP sent to your email.", "success");
+        setOtpModal(true); // Open the OTP modal
+      } else {
+        const errorData = await response.json();
+        handleMessage(errorData.message || "Failed to send OTP.", "error");
+      }
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      handleMessage("Error sending OTP. Please try again.", "error");
+    }
   };
 
-  // const verifyOtp = async (type) => {
-  //   // try {
-  //   //   const response = await fetch(`${apiBaseUrl}/verify-otp`, {
-  //   //     method: "POST",
-  //   //     headers: { "Content-Type": "application/json" },
-  //   //     body: JSON.stringify({ type: otpField, otp }), // Pass the type and OTP to the API (both "email" or "phone" and the entered OTP) *** change accordingly ***
-  //   //   });
-  //   //   if (response.ok) {
-  //   //     if (otpField === "email") {
-  //   //       setEmailOtpVerified(true);
-  //   //       setNotification("Email OTP Verified Successfully!");
-  //   //     } else if (otpField === "phone") {
-  //   //       setPhoneOtpVerified(true);
-  //   //       setNotification("Phone OTP Verified Successfully!");
-  //   //     }
-  //   //     setOtp(""); // Clear the OTP field
-  //   //     setOtpModal(false);
-  //   //   } else {
-  //   //     setNotification("Invalid OTP. Please try again.");
-  //   //     throw new Error("Invalid OTP");
-  //   //   }
-  //   // } catch (error) {
-  //   //   console.error("Error verifying OTP:", error);
-  //   //   setNotification("Error verifying OTP. Please try again.");
-  //   // }
-  // };
+  // Function to send OTP for phone
+  const sendPhoneOtp = async (phoneNumber) => {
+    const url = apiUrls.sendOtp.phone; // API URL for phone OTP
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber }), // Send only phone number
+      });
+
+      if (response.ok) {
+        handleMessage("OTP sent to your phone number.", "success");
+        setOtpModal(true); // Open the OTP modal
+      } else {
+        const errorData = await response.json();
+        handleMessage(errorData.message || "Failed to send OTP.", "error");
+      }
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      handleMessage("Error sending OTP. Please try again.", "error");
+    }
+  };
+
+  // OTP verification logic for email
+  const handleVerifyEmailOtp = async () => {
+    if (!otp || otp.length !== 4) {
+      handleMessage("Please enter a valid 4-digit OTP.", "error");
+      return;
+    }
+    setIsVerifying(true); // Show verifying state
+    try {
+      const url = apiUrls.verifyOtp.email; // API URL for verifying email OTP
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          enteredOtp: otp,
+          email: formData.contactDetails.email,
+        }), // Send OTP and email to backend
+      });
+
+      if (response.ok) {
+        handleMessage("OTP verified successfully!", "success");
+        setOtpModal(false); // Close the modal
+        setOtp(""); // Clear OTP input
+        completeStep(); // Proceed to next step
+      } else {
+        const errorData = await response.json();
+        handleMessage(
+          errorData.message || "Invalid OTP. Please try again.",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      handleMessage(
+        "An error occurred during OTP verification. Please try again.",
+        "error"
+      );
+    } finally {
+      setIsVerifying(false); // Reset verifying state
+    }
+  };
+
+  // OTP verification logic for phone
+  const handleVerifyPhoneOtp = async () => {
+    if (!otp || otp.length !== 4) {
+      handleMessage("Please enter a valid 4-digit OTP.", "error");
+      return;
+    }
+
+    setIsVerifying(true); // Show verifying state
+    try {
+      const url = apiUrls.verifyOtp.phone; // API URL for verifying phone OTP
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          enteredOtp: otp,
+          phoneNumber: formData.contactDetails.phone,
+        }), // Send OTP and phone to backend
+      });
+
+      if (response.ok) {
+        handleMessage("OTP verified successfully!", "success");
+        setOtpModal(false); // Close the modal
+        setOtp(""); // Clear OTP input
+        completeStep(); // Proceed to next step
+      } else {
+        const errorData = await response.json();
+        handleMessage(
+          errorData.message || "Invalid OTP. Please try again.",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      handleMessage(
+        "An error occurred during OTP verification. Please try again.",
+        "error"
+      );
+    } finally {
+      setIsVerifying(false); // Reset verifying state
+    }
+  };
 
   const handleOtpVerification = async () => {
-    // setNotification(""); // Clear any previous notification before starting
-    if (!otp || otp.length !== 6) {
-      // OTP validation
-      // setNotification("Please enter a valid 6-digit OTP.");
-      handlemessage("Please enter a valid 6-digit OTP.", "error");
+    if (!otp || otp.length !== 4) {
+      handleMessage("Please enter a valid 4-digit OTP.", "error");
       return;
     }
-    setIsVerifying(true); // Set isVerifying to true
 
-    // Simulate OTP check (for testing purposes, this is a mock check)
-    const isOtpValid = otp === "123456"; // Replace with real OTP validation logic
+    setIsVerifying(true); // Show verifying state
+    try {
+      const url =
+        otpType === "email" ? apiUrls.verifyOtp.email : apiUrls.verifyOtp.phone;
+      const payload =
+        otpType === "email"
+          ? { enteredOtp: otp, email: formData.contactDetails.email }
+          : { enteredOtp: otp, phoneNumber: formData.contactDetails.phone };
 
-    if (isOtpValid) {
-      //OTP is valid
-      // setNotification("OTP verified successfully!");
-      handlemessage("OTP verified successfully!", "success");
-      handleOtpVerificationSuccess(); // Call the success function
-    } else {
-      // OTP is invalid
-      // setNotification("Invalid OTP. Please try again.");
-      handlemessage("Invalid OTP. Please try again.", "error");
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload), // Send OTP and email/phone to backend
+      });
+
+      if (response.ok) {
+        handleMessage("OTP verified successfully!", "success");
+        setOtpModal(false); // Close OTP modal
+        setOtp(""); // Clear OTP input
+      } else {
+        const errorData = await response.json();
+        handleMessage(
+          errorData.message || "Invalid OTP. Please try again.",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      handleMessage(
+        "An error occurred during OTP verification. Please try again.",
+        "error"
+      );
+    } finally {
+      setIsVerifying(false); // Reset verifying state
     }
-    setIsVerifying(false); // Reset verifying state
   };
 
-  const handleOtpVerificationSuccess = () => {
-    setOtpModal(false);
+  // const handleOtpVerification = () => {
+  //   if (otpType === "email") {
+  //     handleVerifyEmailOtp();
+  //   } else if (otpType === "phone") {
+  //     handleVerifyPhoneOtp();
+  //   }
+  //   setOtp("");
+  // };
 
-    if (otpField === "email") {
-      setEmailOtpVerified(true);
-      setEmailVerified(true);
-      // setNotification("Email OTP Verified Successfully!");
-      handlemessage("Email OTP Verified Successfully!", "success");
-    } else if (otpField === "phone") {
-      setPhoneOtpVerified(true);
-      setPhoneVerified(true);
-      // setNotification("Phone OTP Verified Successfully!");
-      handlemessage("Phone OTP Verified Successfully!", "success");
-    }
+  // // Function to send OTP
+  // const sendOtp = async (type, recipient) => {
+  //   const url = apiUrls.sendOtp[type];
 
-    setOtpVerified(true); // Mark OTP as verified
-    setOtpModal(false); // Close OTP modal
-    setOtp(""); // Clear OTP input
-    verifyOtp(otpField); // Call verifyOtp function with the OTP field type (email or phone)
-  };
+  //   try {
+  //     const response = await fetch(url, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ type, recipient }), // Send type and recipient (email/phone)
+  //     });
+  //     console.log("response", response);
+  //     console.log("type", type);
+  //     console.log("recipient", recipient);
 
+  //     if (response.ok) {
+  //       handleMessage("OTP sent successfully!", "success");
+  //       setOtpModal(true); // Open the OTP modal
+  //     } else {
+  //       const errorData = await response.json();
+  //       handleMessage(errorData.message || "Failed to send OTP.", "error");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error sending OTP:", error);
+  //     handleMessage("Error sending OTP. Please try again.", "error");
+  //   }
+  // };
+
+  // OTP verification logic
+  // const handleOtpVerification = async () => {
+  //   if (!otp || otp.length !== 6) {
+  //     handleMessage("Please enter a valid 6-digit OTP.", "error");
+  //     return;
+  //   }
+
+  //   setIsVerifying(true); // Show verifying state
+  //   try {
+  //     const url = apiUrls.verifyOtp[otpType]; // Assuming `otpType` is "email" or "phone"
+  //     const response = await fetch(url, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ otp, type: otpType }), // Send OTP and type to backend
+  //     });
+
+  //     if (response.ok) {
+  //       handleMessage("OTP verified successfully!", "success");
+  //       setOtpModal(false); // Close the modal
+  //       setOtp(""); // Clear OTP input
+  //       completeStep(); // Proceed to next step
+  //     } else {
+  //       const errorData = await response.json();
+  //       handleMessage(
+  //         errorData.message || "Invalid OTP. Please try again.",
+  //         "error"
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error verifying OTP:", error);
+  //     handleMessage(
+  //       "An error occurred during OTP verification. Please try again.",
+  //       "error"
+  //     );
+  //   } finally {
+  //     setIsVerifying(false); // Reset verifying state
+  //   }
+  // };
+
+  // Function to handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // setNotification("");
-    setMessage({ text: "", type: "" });
-    // setError(null);
-
-    // Validation: Check for required fields
-    const {
-      personalDetails: { firstName, lastName, gender, birthDate },
-      contactDetails: { email, state, city, phone },
-      accountDetails: { password, confirmPassword },
-    } = formData;
-
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !gender ||
-      !birthDate ||
-      !state ||
-      !city ||
-      !phone ||
-      !password ||
-      !confirmPassword
-    ) {
-      // setError("Please fill in all required fields");
-      handlemessage("Please fill in all required fields", "error");
-      return;
-    }
-    // Password Match Validation
-    if (password !== confirmPassword) {
-      // setError("Passwords don't match!");
-      handlemessage("Passwords don't match!", "error");
-      return;
-    }
+    const apiUrl =
+      currentStep === 1
+        ? apiUrls.personalDetails
+        : currentStep === 2
+        ? apiUrls.professionalDetails
+        : apiUrls.documentation;
 
     setLoading(true);
 
-    // try {
-    //   // API Integration
-    //   const response = await fetch("/api/register", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(formData),
-    //   });
+    try {
+      // Prepare payload
+      const payload = new FormData();
 
-    //   if (response.ok) {
-    //     const data = await response.json();
-    //     setNotification("Registration successful!");
-    //     console.log("Response Data:", data);
+      // Add personal details
+      payload.append("user_id", "user123"); // Replace with dynamic user_id
+      payload.append("first_name", formData.personalDetails.firstName);
+      payload.append("last_name", formData.personalDetails.lastName);
+      payload.append("gender", formData.personalDetails.gender);
+      payload.append("date_of_birth", formData.personalDetails.birthDate);
 
-    //     // Redirect to another page after success
-    //     setTimeout(() => navigate("/"), 3000);
-    //   } else {
-    //     const errorData = await response.json();
-    //     setError(errorData.message || "Registration failed.");
-    //   }
-    // } catch (error) {
-    //   console.error("Error during registration:", error);
-    //   setError("An error occurred during registration.");
-    // } finally {
-    //   setLoading(false);
-    // }
+      // Add contact details
+      payload.append("email", formData.contactDetails.email);
+      payload.append("phone_number", formData.contactDetails.phone);
+      payload.append("state", formData.contactDetails.state);
+      payload.append("district", formData.contactDetails.city);
 
-    // using mock data and local storage for simplicity
+      // Step-specific additions
+      if (currentStep === 1) {
+        payload.append("password", formData.accountDetails.password);
+        payload.append(
+          "confirm_password",
+          formData.accountDetails.confirmPassword
+        );
+      }
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    users.push(formData);
-    localStorage.setItem("users", JSON.stringify(users));
+      if (currentStep === 2) {
+        payload.append(
+          "license_number",
+          formData.educationDetails.licenseNumber
+        );
+        payload.append(
+          "qualification",
+          formData.educationDetails.qualification
+        );
+        payload.append(
+          "specialization",
+          formData.educationDetails.specialization
+        );
+        payload.append("experience", formData.educationDetails.experience);
+        payload.append(
+          "institution_name",
+          formData.educationDetails.institutionName
+        );
+      }
 
-    setLoading(false);
+      if (currentStep === 3) {
+        payload.append(
+          "degree_certificate",
+          formData.documentation.degreeCertificate
+        );
+        payload.append("resume", formData.documentation.resume);
+        payload.append("aadhar_number", formData.documentation.aadharNumber);
+        payload.append("aadhar_front", formData.documentation.aadharFront);
+        payload.append("aadhar_back", formData.documentation.aadharBack);
+        payload.append("pan_number", formData.documentation.panNumber);
+        payload.append("pan_card", formData.documentation.panCard);
+        payload.append("signature", formData.documentation.signature);
 
-    setTimeout(() => {
-      handlemessage("Registration successful!", "success");
+        // Add expertise as JSON string
+        payload.append(
+          "expertise",
+          JSON.stringify(formData.documentation.expertise)
+        );
+      }
+      // Log the payload
+      for (const [key, value] of payload.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+      // Send payload to backend
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        body: payload, // FormData automatically sets the appropriate headers
+      });
 
-      navigate("/");
-    }, 3000);
-
-    console.log("Registration data:", formData);
+      if (response.ok) {
+        if (currentStep === 1) {
+          handleMessage("Personal details submitted successfully!", "success");
+          navigate("/"); // Redirect to login page
+        } else if (currentStep === steps.length) {
+          handleMessage("Registration completed successfully!", "success");
+          navigate("/dashboard"); // Redirect to dashboard
+        } else {
+          handleMessage("Step submitted successfully!", "success");
+          setCurrentStep((prev) => prev + 1);
+        }
+      } else {
+        const contentType = response.headers.get("Content-Type");
+        let errorMessage = "Registration failed!";
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        }
+        handleMessage(errorMessage, "error");
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      handleMessage(
+        "An error occurred during registration. Please try again.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+    console.log("Regitsration data:", formData);
   };
 
+  // Render UI
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 overflow-y-auto">
       {/* Left side logo */}
       <div className="w-full md:w-1/3 bg-[#2C394B] flex items-center justify-center p-8">
         <img src={LOGO} alt="Logo" className="w-1/2 h-auto" />
       </div>
-
       {/* Right side form */}
       <div className="w-full h-full md:w-2/3 p-6 md:p-8 flex flex-col overflow-y-auto">
         <div className="bg-white p-8 rounded-lg shadow-lg mx-auto w-full">
@@ -447,7 +591,6 @@ const Registration = () => {
             Welcome to Registration
           </h1>
 
-          {/* notification and error message */}
           {message.text && (
             <div
               className={`fixed top-24 left-2/3 w-fit transform -translate-x-1/2 z-10 py-4 rounded-md flex items-center justify-center text-md font-medium ${
@@ -457,20 +600,13 @@ const Registration = () => {
               }`}
             >
               <span className="pr-3">
-                <svg
-                  width={20}
-                  height={20}
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                <svg width={20} height={20}>
                   <circle
                     cx={10}
                     cy={10}
                     r={10}
                     fill={message.type === "success" ? "#00B078" : "#D9534F"}
                   />
-
                   <path
                     fillRule="evenodd"
                     clipRule="evenodd"
@@ -479,23 +615,21 @@ const Registration = () => {
                   />
                 </svg>
               </span>
-
               {message.text}
             </div>
           )}
-          {/* progress bar */}
-          <div className="mb-6">
+
+          {/* Progress Bar */}
+          {/* <div className="mb-6">
             <div className="flex items-center">
               <div className="flex-grow h-1 bg-gray-300">
                 <div
                   className="h-full bg-[#2C394B]"
-                  style={{
-                    width: `${((currentStep + 1) / steps.length) * 100}%`,
-                  }}
+                  style={{ width: `${(currentStep / steps.length) * 100}%` }}
                 />
               </div>
               <div className="ml-4 text-gray-600">
-                {currentStep + 1} of {steps.length}
+                {currentStep} of {steps.length}
               </div>
             </div>
             <div className="flex justify-between mt-3">
@@ -503,101 +637,111 @@ const Registration = () => {
                 <div
                   key={index}
                   className={`text-center ${
-                    index <= currentStep ? "text-[#2C394B]" : "text-gray-400"
+                    index < currentStep ? "text-[#2C394B]" : "text-gray-400"
                   }`}
                 >
                   <div>{step.title}</div>
                   <div
                     className={`h-1 ${
-                      index <= currentStep ? "bg-[#2C394B]" : "bg-gray-300"
+                      index < currentStep ? "bg-[#2C394B]" : "bg-gray-300"
                     }`}
                   ></div>
                 </div>
               ))}
             </div>
-          </div>
-          {/* step head progress bar */}
-          {/* <div className="flex justify-between mb-4 flex-wrap">
-            {["Personal Details", "Education Details", "Document Details"].map(
-              (title, index) => (
-                <span
-                  key={index}
-                  className={`cursor-pointer ${
-                    step === index + 1 ? "text-[#2C394B]" : "text-gray-400"
-                  } font-semibold`}
-                  onClick={() => setStep(index + 1)}
-                >
-                  {title}
-                </span>
-              )
-            )}
           </div> */}
+          {/* Progress Bar and Header */}
+          <div className="mb-6">
+            <div className="flex items-center mb-3">
+              {/* Header Titles */}
+              {steps.map((step) => (
+                <div
+                  key={step.id}
+                  className="flex-1 text-center cursor-pointer"
+                  onClick={() => handleStepClick(step.id)}
+                >
+                  <span
+                    className={`text-sm font-medium ${
+                      step.id === currentStep
+                        ? "text-[#2C394B]" // Active step color
+                        : step.id < currentStep
+                        ? "text-green-500" // Completed step color
+                        : "text-gray-400" // Upcoming step color
+                    }`}
+                  >
+                    {step.title}
+                  </span>
+                </div>
+              ))}
+            </div>
 
-          {/* Steps form: Render forms based on current step */}
+            {/* Progress Bar */}
+            <div className="relative h-2 bg-gray-300 rounded">
+              <div
+                className="absolute h-full bg-[#2C394B] rounded"
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+          </div>
 
+          {/* Registration Form */}
           <form onSubmit={handleSubmit}>
-            {/* Step 1: Personal Details */}
-            {currentStep === 0 && (
+            {currentStep === 1 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* First Name */}
                 <InputField
                   label="First Name"
                   name="personalDetails.firstName"
                   placeholder="Enter your first name"
                   value={personalDetails.firstName}
                   handleChange={handleChange}
+                  disabled={stepLocked}
                 />
-                {/* Last Name */}
                 <InputField
                   label="Last Name"
                   name="personalDetails.lastName"
                   placeholder="Enter your last name"
                   value={personalDetails.lastName}
                   handleChange={handleChange}
+                  disabled={stepLocked}
                 />
-                {/* Email */}
                 <InputField
                   label="Email"
                   name="contactDetails.email"
                   placeholder="Enter your email"
                   type="email"
-                  value={formData.contactDetails.email}
+                  value={contactDetails.email}
                   handleChange={handleChange}
+                  disabled={stepLocked}
                 />
-                {/* Phone */}
                 <InputField
-                  label="Phone"
+                  label="phoneNumber"
                   name="contactDetails.phone"
                   placeholder="Enter your phone number"
                   type="text"
-                  value={formData.contactDetails.phone}
+                  value={contactDetails.phone}
                   handleChange={handleChange}
+                  disabled={stepLocked}
                 />
                 <div>
-                  {/* Verify Email Button */}
                   <button
                     type="button"
                     onClick={handleVerifyEmail}
-                    disabled={isVerifying} // Disable button if email is not entered
+                    disabled={isVerifying}
                     className="text-[#2C394B] bg-[#f1f5f9] border border-[#2C394B] hover:bg-[#2C394B] hover:text-[#f1f5f9] p-2 rounded"
                   >
                     Verify Email
                   </button>
                 </div>
-
                 <div>
-                  {/* Verify Phone Button */}
                   <button
                     type="button"
                     onClick={handleVerifyPhone}
-                    disabled={isVerifying} // Disable button if phone is not entered
+                    disabled={isVerifying}
                     className="text-[#2C394B] bg-[#f1f5f9] border border-[#2C394B] hover:bg-[#2C394B] hover:text-[#f1f5f9] p-2 rounded"
                   >
                     Verify Phone
                   </button>
                 </div>
-
-                {/* OTP Modal */}
                 {otpModal && (
                   <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-lg w-11/12 md:w-1/3">
@@ -615,16 +759,12 @@ const Registration = () => {
                         type="button"
                         onClick={handleOtpVerification}
                         className="w-full bg-[#337357] text-white py-2 rounded-md"
-                        disabled={!isVerifying}
                       >
                         {isVerifying ? "Verifying..." : "Verify OTP"}
                       </button>
                       <button
                         type="button"
-                        onClick={() => {
-                          sendOtp("");
-                          setOtpModal(false);
-                        }}
+                        onClick={() => setOtpModal(false)}
                         className="w-full bg-[#C62E2E] text-white py-2 rounded-md mt-2"
                       >
                         Close
@@ -632,14 +772,13 @@ const Registration = () => {
                     </div>
                   </div>
                 )}
-
-                {/* Gender */}
                 <InputField
                   label="Gender"
                   name="personalDetails.gender"
                   value={personalDetails.gender}
                   handleChange={handleChange}
                   component="select"
+                  disabled={stepLocked}
                 >
                   <option value="" disabled>
                     Select Gender
@@ -648,7 +787,6 @@ const Registration = () => {
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
                 </InputField>
-                {/* Date of Birth */}
                 <InputField
                   label="Date of Birth"
                   name="personalDetails.birthDate"
@@ -656,14 +794,15 @@ const Registration = () => {
                   handleChange={handleChange}
                   component="input"
                   type="date"
+                  disabled={stepLocked}
                 />
-                {/* State Dropdown */}
                 <InputField
                   label="State"
                   name="contactDetails.state"
                   value={formData.contactDetails.state}
                   handleChange={handleStateChange}
                   component="select"
+                  disabled={stepLocked}
                 >
                   <option value="" disabled>
                     Select State
@@ -674,27 +813,24 @@ const Registration = () => {
                     </option>
                   ))}
                 </InputField>
-                {/* District Dropdown */}
                 <InputField
                   label="District"
                   name="contactDetails.city"
                   value={formData.contactDetails.city}
                   handleChange={handleDistrictChange}
                   component="select"
+                  disabled={stepLocked}
                 >
                   <option value="" disabled>
                     Select City
                   </option>
-                  {districts.length > 0 &&
-                    districts.map((district) => (
-                      <option key={district} value={district}>
-                        {district}
-                      </option>
-                    ))}
+                  {districts.map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
                 </InputField>
-
                 <div className="relative">
-                  {/* Password Field */}
                   <InputField
                     label="Password *"
                     name="accountDetails.password"
@@ -702,6 +838,7 @@ const Registration = () => {
                     type={showPassword ? "text" : "password"}
                     value={accountDetails.password}
                     handleChange={handleChange}
+                    disabled={stepLocked}
                   />
                   <span
                     onClick={() => setShowPassword(!showPassword)}
@@ -710,16 +847,15 @@ const Registration = () => {
                     {showPassword ? <FiEyeOff /> : <FiEye />}
                   </span>
                 </div>
-
                 <div className="relative">
-                  {/* Confirm Password Field */}
                   <InputField
                     label="Confirm Password *"
                     name="accountDetails.confirmPassword"
                     placeholder="Confirm Password"
                     type={showConfirmPassword ? "text" : "password"}
-                    value={formData.accountDetails.confirmPassword}
+                    value={accountDetails.confirmPassword}
                     handleChange={handleChange}
+                    disabled={stepLocked}
                   />
                   <span
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -728,53 +864,42 @@ const Registration = () => {
                     {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
                   </span>
                 </div>
-                {/*  */}
-                <button
-                  onClick={completeStep}
-                  className="mt-4 bg-[#337357] text-white py-2 px-4 rounded"
-                >
-                  Submit
-                </button>
               </div>
             )}
 
-            {/* Step 2 : Education details */}
-
-            {currentStep === 1 && (
+            {/* Step 2: Education Details */}
+            {currentStep === 2 && (
               <div>
-                {/* License Number */}
                 <InputField
                   label="License Number *"
                   name="educationDetails.licenseNumber"
                   placeholder="Enter License Number"
-                  value={formData.educationDetails.licenseNumber}
+                  value={educationDetails.licenseNumber}
                   handleChange={handleChange}
                 />
-                {/* Qualification */}
                 <InputField
                   label="Qualification *"
                   name="educationDetails.qualification"
                   placeholder="Enter Qualification"
-                  value={formData.educationDetails.qualification}
+                  value={educationDetails.qualification}
                   handleChange={handleChange}
                 />
-                {/* Specialization */}
                 <InputField
                   label="Specialization"
                   name="educationDetails.specialization"
                   placeholder={"Enter Specialization"}
-                  value={formData.educationDetails.specialization}
+                  value={educationDetails.specialization}
                   handleChange={handleChange}
                 />
-                {/* Experience */}
                 <InputField
                   label="Experience"
                   name="educationDetails.experience"
                   placeholder={"Enter Experience"}
-                  value={formData.educationDetails.experience}
+                  value={educationDetails.experience}
                   handleChange={handleChange}
                 />
                 <button
+                  type="button"
                   onClick={completeStep}
                   className="mt-4 bg-[#337357] text-white py-2 px-4 rounded"
                 >
@@ -783,111 +908,83 @@ const Registration = () => {
               </div>
             )}
 
-            {/* Step 3 : Document details */}
-            {currentStep === 2 && (
+            {/* Step 3: Document Details */}
+            {currentStep === 3 && (
               <div className="grid grid-cols-3 gap-4">
-                {/* Documentation Details */}
                 <InputField
                   label="Upload Profile Picture"
                   name="documentation.profilePicture"
                   type="file"
                   handleChange={handleFileChange}
                 />
-                {/* Degree Certificate */}
                 <InputField
                   label="Upload Degree Certificate"
                   name="documentation.degreeCertificate"
                   type="file"
                   handleChange={handleFileChange}
                 />
-                {/* Resume */}
                 <InputField
                   label="Upload Resume"
                   name="documentation.resume"
                   type="file"
                   handleChange={handleFileChange}
                 />
-                {/* Aadhar Number */}
                 <InputField
                   label="Aadhar Number"
                   name="documentation.aadharNumber"
                   placeholder="Enter Aadhar Number"
-                  value={formData.documentation.aadharNumber}
+                  value={documentation.aadharNumber}
                   handleChange={handleChange}
                 />
-                {/* Aadhar Card */}
                 <InputField
                   label="Upload Aadhar Card Front"
                   name="documentation.aadharFront"
                   type="file"
                   handleChange={handleFileChange}
                 />
-                {/* Aadhar Card */}
                 <InputField
                   label="Upload Aadhar Card Back *"
                   name="documentation.aadharBack"
                   type="file"
                   handleChange={handleFileChange}
                 />
-                {/* PAN Number */}
                 <InputField
                   label="PAN Number *"
                   name="documentation.panNumber"
                   placeholder="Enter PAN Number"
-                  value={formData.documentation.panNumber}
+                  value={documentation.panNumber}
                   handleChange={handleChange}
                 />
-                {/* PAN Card */}
                 <InputField
                   label="Upload PAN Card *"
                   name="documentation.panCard"
                   type="file"
                   handleChange={handleFileChange}
                 />
-                {/* Signature */}
                 <InputField
                   label="Upload Signature *"
                   name="documentation.signature"
                   type="file"
                   handleChange={handleFileChange}
                 />
-                {/* check box */}
-                <InputField
-                  label="professional Expertise"
-                  type="checkbox"
-                  name="professionalExpertise"
-                  options={[
-                    "Career Counsellor",
-                    "Psychologist",
-                    "Group Counsellor",
-                  ]}
-                  handleChange={(e) => {}}
-                ></InputField>
-                {/* Register Button */}
-                <div className="mt-4 flex justify-center">
-                  <button
-                    type="submit"
-                    className="bg-[#2C394B] text-white w-fit h-fit py-2 px-4 rounded-md"
-                  >
-                    {loading ? "Registering..." : "Complete Registeration"}
-                  </button>
-                </div>
               </div>
             )}
-            {/* Next Button */}
-            {/* <button
-              className="bg-[#2C394B] text-white py-2 px-4 rounded-md"
-              onClick={handleNextStep}
-            >
-              Next
-            </button> */}
+            <div className="mt-4 flex justify-center">
+              <button
+                type="submit"
+                className="bg-[#2C394B] text-white w-fit h-fit py-2 px-4 rounded-md"
+              >
+                {loading ? "Registering..." : "Register"}
+              </button>
+            </div>
           </form>
+
           {/* Login Link */}
           <div className="absolute top-6 right-14 flex justify-center items-center mt-4">
             <p className="text-sm text-[#2C394B]">Already have an account?</p>
             <button
-              className="ml-2 text-md text-[#2C394B] hover:text-[#597aac] hover:translate-x-1 transition duration-200 ease-in-out flex items-center gap-1"
               onClick={() => navigate("/")}
+              className="ml-2 text-md text-[#2C394B] hover:text-[#597aac] hover:translate-x-1 transition duration-200 ease-in-out flex items-center gap-1"
             >
               <FaArrowRightFromBracket />
               Login
@@ -899,6 +996,7 @@ const Registration = () => {
   );
 };
 
+// Reusable Input Field Component
 const InputField = ({
   label,
   type = "text",
@@ -909,42 +1007,39 @@ const InputField = ({
   options = [],
   component = "input",
   ...props
-}) => {
-  return (
-    <div className="mb-4 flex flex-col">
-      <label htmlFor={name} className="block text-[#2C394B]">
-        {label}
-        {props.required && "*"}
-      </label>
-      {type === "checkbox" && options.length > 0 ? (
-        <div className="flex flex-col">
-          {options.map((option, index) => (
-            <label key={index} className="inline-flex items-center mt-1">
-              <input
-                type="checkbox"
-                name={name}
-                value={option}
-                onChange={handleChange}
-                className="mr-2"
-              />
-              {option}
-            </label>
-          ))}
-        </div>
-      ) : (
-        React.createElement(component, {
-          id: name,
-          type,
-          name,
-          placeholder,
-          value,
-          onChange: handleChange,
-          className: "w-full p-2 border border-gray-300 rounded-md",
-          ...props,
-        })
-      )}
-    </div>
-  );
-};
+}) => (
+  <div className="mb-4 flex flex-col">
+    <label htmlFor={name} className="block text-[#2C394B]">
+      {label} {props.required && "*"}
+    </label>
+    {type === "checkbox" && options.length > 0 ? (
+      <div className="flex flex-col">
+        {options.map((option, index) => (
+          <label key={index} className="inline-flex items-center mt-1">
+            <input
+              type="checkbox"
+              name={name}
+              value={option}
+              onChange={handleChange}
+              className="mr-2"
+            />
+            {option}
+          </label>
+        ))}
+      </div>
+    ) : (
+      React.createElement(component, {
+        id: name,
+        type,
+        name,
+        placeholder,
+        value,
+        onChange: handleChange,
+        className: "w-full p-2 border border-gray-300 rounded-md",
+        ...props,
+      })
+    )}
+  </div>
+);
 
 export default Registration;
