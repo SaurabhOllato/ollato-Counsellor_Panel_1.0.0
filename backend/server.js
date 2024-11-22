@@ -5,6 +5,7 @@ const db = require("./config/db"); // This will establish the connection
 const bodyParser = require("body-parser");
 const authRoutes = require("./routes/counsellorAuthRoutes");
 const verificationRoutes = require("./routes/verificationRoutes");
+const resetPasswordRoutes = require("./routes/resetPassword");
 const path = require("path");
 
 const app = express();
@@ -27,6 +28,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Routes
 app.use("/auth", authRoutes);
 app.use("/otp", verificationRoutes);
+app.use("/reset", resetPasswordRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
