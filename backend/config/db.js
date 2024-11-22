@@ -4,10 +4,10 @@ const dotenv = require("dotenv");
 dotenv.config();
 // Create a MySQL connection pool
 const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "counsellors",
 });
 
 // Test the connection
@@ -16,6 +16,10 @@ const db = mysql.createPool({
     // Execute a simple query to test the connection
     await db.query("SELECT 1");
     console.log("Database connected successfully.");
+    console.log(
+      "Connected to DB:",
+      process.env.DB_NAME || "local database counsellors"
+    );
   } catch (error) {
     console.error("Database connection failed:", error);
   }
