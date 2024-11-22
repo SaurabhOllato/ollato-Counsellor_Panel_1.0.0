@@ -63,6 +63,7 @@ console.log("This is path: ", path.resolve("uploads"));
 // Controller to handle file uploads and saving to database
 const uploadCounsellorDocuments = async (req, res) => {
   console.log("Starting document upload process...");
+  console.log("Request body - CounsellorDocuments:", req.body);
 
   try {
     // Ensure files are uploaded using Multer
@@ -164,6 +165,7 @@ const uploadCounsellorDocuments = async (req, res) => {
 const addProfessionalDetails = async (req, res) => {
   const { user_id, license_number, qualification, specification, experience } =
     req.body;
+  console.log("Request body - ProfessionalDetails:", req.body);
 
   // Check for missing required fields
   if (
@@ -226,7 +228,7 @@ const addPersonalDetails = async (req, res) => {
     password,
     confirm_password,
   } = req.body;
-  console.log("personal details", req.body);
+  console.log("Request body - PersonalDetails:", req.body);
 
   // Check for missing required fields
   if (
@@ -303,6 +305,7 @@ const addPersonalDetails = async (req, res) => {
 // login controller
 const login = async (req, res) => {
   const { email, password } = req.body;
+  console.log("Login request:", req.body);
 
   // Validate input
   if (!email || !password) {

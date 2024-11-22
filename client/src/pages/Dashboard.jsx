@@ -17,10 +17,10 @@ export default function Dashboard() {
   };
 
   const completeProfile = () => {
-    triggerNotification("Profile complete!", "success");
-    navigate("/registration");
-    const updatedUser = { ...user, profileComplete: true };
-    localStorage.setItem("user", JSON.stringify(updatedUser));
+    // triggerNotification("Profile complete!", "success");
+    navigate("/registration-complete");
+    // const updatedUser = { ...user, profileComplete: true };
+    // localStorage.setItem("user", JSON.stringify(updatedUser));
     // setProfileComplete(true);
   };
   <Notification

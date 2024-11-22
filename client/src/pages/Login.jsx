@@ -58,10 +58,20 @@ function Login() {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem("token", data.token);
-        login(data.user); // Save user in context
-        triggerNotification("Login successful! Redirecting...", "success");
-        navigate("/dashboard");
+
+        // Validate if expected response data exists
+        if (data.user) {
+          // localStorage.setItem("token", data.token); // Store token in localStorage
+          login(data.user); // Save user in context
+          triggerNotification("Login successful! Redirecting...", "success");
+          navigate("/dashboard");
+        } else {
+          triggerNotification("Unexpected response format.", "error");
+        }
+        // localStorage.setItem("token", data.token);
+        // login(data.user); // Save user in context
+        // triggerNotification("Login successful! Redirecting...", "success");
+        // navigate("/dashboard");
       } else {
         const errorData = await response.json();
         triggerNotification(
@@ -77,6 +87,7 @@ function Login() {
     } finally {
       setLoading(false);
     }
+    console.log("Login Data:", formData);
   };
 
   // Send OTP

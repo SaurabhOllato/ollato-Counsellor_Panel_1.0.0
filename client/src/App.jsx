@@ -11,16 +11,21 @@ import ForgotPassword from "./components/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./Layout";
 import ErrorPage from "./error-page.jsx";
+import RegistrationDetails from "./pages/RegistrationDetails.jsx";
 function App() {
-  // Mock authentication state
-  // const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   // console.log(import.meta.env.VITE_PERSONAL_DELAILS_API);
 
-  // Private route wrapper
+  // Private route
   const PrivateRoute = ({ children }) => {
     const { user } = useAuth();
-    return user ? children : <Navigate to="/" />;
+
+    // If the user is not authenticated, redirect to login
+    if (!user) {
+      return <Navigate to="/" />;
+    }
+
+    // If the user is authenticated, render the children components (like Dashboard)
+    return children;
   };
 
   return (
@@ -54,7 +59,17 @@ function App() {
             }
             errorElement={<ErrorPage />}
           />
-          
+          <Route
+            path="/registration-complete"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <RegistrationDetails />
+                </Layout>
+              </PrivateRoute>
+            }
+            errorElement={<ErrorPage />}
+          />
         </Routes>
       </BrowserRouter>
     </UserProvider>

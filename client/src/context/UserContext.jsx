@@ -1,48 +1,44 @@
-import React, { createContext, useState, useContext } from "react";
+// UserContext.jsx
+import React, { createContext, useState, useContext, useEffect } from "react";
 
 // Create the User Context
 const UserContext = createContext({
   user: null,
-  setUser: () => {},
   profileComplete: false,
-  setProfileComplete: () => {},
   login: () => {},
   logout: () => {},
 });
 
-// Create the UserProvider component
-
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Stores current user data
-  const [profileComplete, setProfileComplete] = useState(false); // Tracks profile completion status
+  const [user, setUser] = useState(null);
+  const [profileComplete, setProfileComplete] = useState(false);
+
+  // useEffect(() => {
+  //   const storedUser = localStorage.getItem("user");
+  //   if (storedUser) {
+  //     const parsedUser = JSON.parse(storedUser);
+  //     setUser(parsedUser);
+  //     setProfileComplete(parsedUser?.profileComplete || false);
+  //   }
+  // }, []);
 
   const login = (userData) => {
     setUser(userData);
     setProfileComplete(userData?.profileComplete || false);
-    localStorage.setItem("user", JSON.stringify(userData)); // Save userData directly
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
     setProfileComplete(false);
-    localStorage.removeItem("user"); // Remove user data from local storage
+    localStorage.removeItem("user");
   };
 
   return (
-    <UserContext.Provider
-      value={{
-        user,
-        setUser,
-        profileComplete,
-        setProfileComplete,
-        login,
-        logout,
-      }}
-    >
+    <UserContext.Provider value={{ user, profileComplete, login, logout }}>
       {children}
     </UserContext.Provider>
   );
 };
 
-// custom hook to access the UserContext
 export const useAuth = () => useContext(UserContext);
