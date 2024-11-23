@@ -10,22 +10,25 @@ const UserContext = createContext({
 });
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
   const [profileComplete, setProfileComplete] = useState(false);
 
-  // useEffect(() => {
-  //   const storedUser = localStorage.getItem("user");
-  //   if (storedUser) {
-  //     const parsedUser = JSON.parse(storedUser);
-  //     setUser(parsedUser);
-  //     setProfileComplete(parsedUser?.profileComplete || false);
-  //   }
-  // }, []);
+  // Rehydrate the user state from localStorage on mount
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
 
   const login = (userData) => {
     setUser(userData);
-    setProfileComplete(userData?.profileComplete || false);
-    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("user", JSON.stringify(user));
+    // setProfileComplete(userData?.profileComplete || false);
   };
 
   const logout = () => {
@@ -35,7 +38,9 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, profileComplete, login, logout }}>
+    <UserContext.Provider
+      value={{ user, profileComplete, setProfileComplete, login, logout }}
+    >
       {children}
     </UserContext.Provider>
   );

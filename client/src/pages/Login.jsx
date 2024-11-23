@@ -41,7 +41,7 @@ function Login() {
   };
 
   // Email/Password Login
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => { 
     e.preventDefault();
     if (showOtpLogin) return; // Prevent form submission if in OTP login mode
 

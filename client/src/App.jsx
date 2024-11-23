@@ -17,15 +17,17 @@ function App() {
 
   // Private route
   const PrivateRoute = ({ children }) => {
-    const { user } = useAuth();
+    const { user, } = useAuth();
+    // console.log("User in private route- before", user);
 
-    // If the user is not authenticated, redirect to login
     if (!user) {
-      return <Navigate to="/" />;
-    }
+      // console.log("User in private route-middle ", user);
 
-    // If the user is authenticated, render the children components (like Dashboard)
-    return children;
+      return <Navigate to="/" replace />;
+    }
+    // console.log("User in private route- after", user);
+
+    return children; // Render the protected component if authenticated
   };
 
   return (

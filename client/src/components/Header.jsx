@@ -51,7 +51,7 @@ function Header() {
             {/* user profile */}
             <div className="flex items-center gap-4">
               <FaUserCog className="text-2xl text-[#F5F5F5] hidden sm:block" />
-              {user?.email}
+              {user?.first_name}
             </div>
           </div>
         </div>

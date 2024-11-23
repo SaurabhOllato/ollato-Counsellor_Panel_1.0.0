@@ -10,19 +10,16 @@ export default function Dashboard() {
   const navigate = useNavigate();
   // console.log("User", user);
   // console.log("Profile Complete", profileComplete);
-
+  setProfileComplete(true); // Set profileComplete to true
   const triggerNotification = (message, type) => {
     setNotification({ message, type });
     setTimeout(() => setNotification({ message: "", type: "" }), 3000);
   };
 
   const completeProfile = () => {
-    // triggerNotification("Profile complete!", "success");
     navigate("/registration-complete");
-    // const updatedUser = { ...user, profileComplete: true };
-    // localStorage.setItem("user", JSON.stringify(updatedUser));
-    // setProfileComplete(true);
   };
+
   <Notification
     message={notification.message}
     type={notification.type}
@@ -87,9 +84,9 @@ export default function Dashboard() {
               Counsellor Information
             </h3>
             <div className="mb-4 md:text-lg text-gray-400 sm:items-start">
-              <p>Name: Ashish </p>
+              <p>Name:{user?.first_name} </p>
               <p>Age: 26 Years</p>
-              <p>Mobile No.: 976921308</p>
+              <p>Mobile No.: {user?.phone_number}</p>
             </div>
           </div>
 
