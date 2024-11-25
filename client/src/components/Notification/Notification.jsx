@@ -54,6 +54,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import "./Notification.css";
+import { MdCancel } from "react-icons/md";
 
 const Notification = ({ message, type = "success", onClose }) => {
   if (!message) return null; // Render nothing if no message is provided
@@ -95,7 +96,7 @@ const Notification = ({ message, type = "success", onClose }) => {
           onClick={onClose}
           aria-label="Close notification"
         >
-          x
+          <MdCancel />
         </button>
       )}
     </div>

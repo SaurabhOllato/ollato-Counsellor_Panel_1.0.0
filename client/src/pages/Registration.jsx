@@ -11,16 +11,16 @@ import LOGO from "../assets/ollatoLogo.png";
 const Registration = () => {
   // Single State for Form Data
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    first_name: "",
+    last_name: "",
     email: "",
-    phone: "",
+    phone_number: "",
     gender: "",
-    birthDate: "",
+    date_of_birth: "",
     state: "",
     city: "",
     password: "",
-    confirmPassword: "",
+    confirm_password: "",
   });
 
   const [otp, setOtp] = useState("");
@@ -205,7 +205,7 @@ const Registration = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           enteredOtp: otp,
-          phoneNumber: formData.contactDetails.phone,
+          phoneNumber: formData.contactDetails.phone_number,
         }), // Send OTP and phone to backend
       });
 
@@ -245,7 +245,7 @@ const Registration = () => {
       const payload =
         otpType === "email"
           ? { enteredOtp: otp, email: formData.email }
-          : { enteredOtp: otp, phoneNumber: formData.phone };
+          : { enteredOtp: otp, phoneNumber: formData.phone_number };
 
       const response = await fetch(url, {
         method: "POST",
@@ -292,7 +292,7 @@ const Registration = () => {
   //   const payload =
   //     otpType === "email"
   //       ? { enteredOtp: otp, email: formData.email }
-  //       : { enteredOtp: otp, phone: formData.phone };
+  //       : { enteredOtp: otp, phone: formData.phone_number };
 
   //   try {
   //     const response = await fetch(url, {
@@ -326,16 +326,16 @@ const Registration = () => {
     // Flatten the form data
     const payload = {
       user_id: "user123", // Replace with dynamic user ID
-      first_name: formData.firstName,
-      last_name: formData.lastName,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
       email: formData.email,
-      phone_number: formData.phone,
+      phone_number: formData.phone_number,
       gender: formData.gender,
-      date_of_birth: formData.birthDate,
+      date_of_birth: formData.date_of_birth,
       state: formData.state,
       district: formData.city,
       password: formData.password,
-      confirm_password: formData.confirmPassword,
+      confirm_password: formData.confirm_password,
     };
 
     console.log("personal details - payload", payload);
@@ -391,16 +391,16 @@ const Registration = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
                 label="First Name"
-                name="firstName"
+                name="first_name"
                 placeholder="Enter your first name"
-                value={formData.firstName}
+                value={formData.first_name}
                 handleChange={handleChange}
               />
               <InputField
                 label="Last Name"
-                name="lastName"
+                name="last_name"
                 placeholder="Enter your last name"
-                value={formData.lastName}
+                value={formData.last_name}
                 handleChange={handleChange}
               />
               <InputField
@@ -414,10 +414,10 @@ const Registration = () => {
               />
               <InputField
                 label="Phone Number"
-                name="phone"
+                name="phone_number"
                 placeholder="Enter your phone number"
                 type="text"
-                value={formData.phone}
+                value={formData.phone_number}
                 handleChange={handleChange}
                 disabled={isPhoneVerified}
               />
@@ -470,8 +470,8 @@ const Registration = () => {
               </InputField>
               <InputField
                 label="Date of Birth"
-                name="birthDate"
-                value={formData.birthDate}
+                name="date_of_birth"
+                value={formData.date_of_birth}
                 handleChange={handleChange}
                 type="date"
               />
@@ -528,10 +528,10 @@ const Registration = () => {
               <div className="relative">
                 <InputField
                   label="Confirm Password"
-                  name="confirmPassword"
+                  name="confirm_password"
                   placeholder="Confirm Password"
                   type={showConfirmPassword ? "text" : "password"}
-                  value={formData.confirmPassword}
+                  value={formData.confirm_password}
                   handleChange={handleChange}
                 />
                 <span

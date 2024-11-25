@@ -5,6 +5,7 @@ import { FaArrowRightFromBracket } from "react-icons/fa6";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import Notification from "../components/Notification/Notification";
 import { useAuth } from "../context/UserContext.jsx";
+import { useNotification } from "../context/NotificationContext.jsx";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -19,20 +20,15 @@ function Login() {
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [notification, setNotification] = useState({ message: "", type: "" });
+  // const [notification, setNotification] = useState({ message: "", type: "" });
 
   const login_Url = import.meta.env.VITE_LOGIN_API;
   const send_mobile_otp_Url = import.meta.env.VITE_SEND_MOBILE_OTP_API;
   const verify_mobile_otp_Url = import.meta.env.VITE_VERIFY_MOBILE_OTP_API;
 
   const { login } = useAuth(); // Access context login function
+  const { triggerNotification } = useNotification();
   const navigate = useNavigate();
-
-  // Trigger a notification
-  const triggerNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification({ message: "", type: "" }), 3000);
-  };
 
   // Handle input changes
   const handleChange = (e) => {
@@ -41,7 +37,7 @@ function Login() {
   };
 
   // Email/Password Login
-  const handleSubmit = async (e) => { 
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (showOtpLogin) return; // Prevent form submission if in OTP login mode
 
@@ -142,7 +138,7 @@ function Login() {
         const data = await response.json();
         localStorage.setItem("token", data.token);
         login(data.user); // Save user in context
-        triggerNotification("Login successful! Redirecting...", "success");
+        triggerNotification("Login successful!", "success");
         navigate("/dashboard");
       } else {
         const errorData = await response.json();
@@ -178,10 +174,6 @@ function Login() {
           <h1 className="text-2xl text-[#2C394B] font-semibold mb-6 text-center">
             {showOtpLogin ? "Login with OTP" : "Welcome Back"}
           </h1>
-          <Notification
-            message={notification.message}
-            type={notification.type}
-          />
           <form onSubmit={handleSubmit}>
             {showOtpLogin ? (
               <>

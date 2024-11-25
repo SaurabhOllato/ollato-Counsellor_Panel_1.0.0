@@ -3,6 +3,7 @@ import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { UserProvider } from "./context/UserContext.jsx";
+import { NotificationProvider } from "./context/NotificationContext";
 import { useAuth } from "./context/UserContext.jsx";
 
 import Registration from "./pages/Registration";
@@ -12,68 +13,75 @@ import Dashboard from "./pages/Dashboard";
 import Layout from "./Layout";
 import ErrorPage from "./error-page.jsx";
 import RegistrationDetails from "./pages/RegistrationDetails.jsx";
+import SupportForm from "./components/SupportForm.jsx";
 function App() {
   // console.log(import.meta.env.VITE_PERSONAL_DELAILS_API);
 
-  // Private route
   const PrivateRoute = ({ children }) => {
-    const { user, } = useAuth();
-    // console.log("User in private route- before", user);
+    const { user } = useAuth();
 
     if (!user) {
-      // console.log("User in private route-middle ", user);
-
       return <Navigate to="/" replace />;
     }
-    // console.log("User in private route- after", user);
 
-    return children; // Render the protected component if authenticated
+    return children;
   };
 
   return (
     <UserProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* public routes */}
-          <Route path="/" element={<Login />} errorElement={<ErrorPage />} />
-          <Route
-            path="/registration"
-            element={<Registration />}
-            errorElement={<ErrorPage />}
-          />
-          <Route
-            path="/forgot-password"
-            element={<ForgotPassword />}
-            ErrorBoundary={ErrorBoundary}
-          />
-          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+      <NotificationProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* public routes */}
+            <Route path="/" element={<Login />} errorElement={<ErrorPage />} />
+            <Route
+              path="/registration"
+              element={<Registration />}
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/forgot-password"
+              element={<ForgotPassword />}
+              ErrorBoundary={ErrorBoundary}
+            />
 
-          {/* private routes */}
-          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Layout>
-                  <Dashboard />
-                </Layout>
-              </PrivateRoute>
-            }
-            errorElement={<ErrorPage />}
-          />
-          <Route
-            path="/registration-complete"
-            element={
-              <PrivateRoute>
-                <Layout>
-                  <RegistrationDetails />
-                </Layout>
-              </PrivateRoute>
-            }
-            errorElement={<ErrorPage />}
-          />
-        </Routes>
-      </BrowserRouter>
+            {/* private routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
+                </PrivateRoute>
+              }
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/registration-complete"
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <RegistrationDetails />
+                  </Layout>
+                </PrivateRoute>
+              }
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/support"
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <SupportForm />
+                  </Layout>
+                </PrivateRoute>
+              }
+              errorElement={<ErrorPage />}
+            />
+          </Routes>
+        </BrowserRouter>
+      </NotificationProvider>
     </UserProvider>
   );
 }
