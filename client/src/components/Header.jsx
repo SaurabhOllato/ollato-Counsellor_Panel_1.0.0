@@ -6,7 +6,7 @@ import { useAuth } from "../context/UserContext";
 import { useNotification } from "../context/NotificationContext";
 
 function Header() {
-  const { user, logout } = useAuth();
+  const { user, logout, profileComplete } = useAuth();
   const { triggerNotification } = useNotification();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -121,7 +121,10 @@ function Header() {
           >
             <button
               onClick={handleProfileClick}
-              className="dropdown-item hover:text-[#3B1E54]"
+              className={`dropdown-item hover:text-[#3B1E54] ${
+                !profileComplete ? "cursor-not-allowed text-grey" : ""
+              }`}
+              disabled={!profileComplete}
             >
               Profile
             </button>

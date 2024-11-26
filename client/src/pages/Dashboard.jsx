@@ -1,21 +1,31 @@
 import React, { useState, useEffect } from "react";
 import LOGO from "../assets/ollatoLogo.png";
 import { useAuth } from "../context/UserContext";
-import Notification from "../components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
 
 export default function Dashboard() {
-  const { user, profileComplete, setProfileComplete, logout } = useAuth();
+  const { user, profileComplete, setProfileComplete, profileStatus, logout } =
+    useAuth();
   const { triggerNotification } = useNotification();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (profileComplete) {
-      return;
-    }
-    setProfileComplete(true); // Set profileComplete to true if not already
-  }, [profileComplete, setProfileComplete]);
+  // useEffect(() => {
+  //   // Trigger notification for `waiting_approval` status
+  //   if (profileStatus === "waiting_approval") {
+  //     triggerNotification(
+  //       "Your profile is under review. Please wait for approval.",
+  //       "info"
+  //     );
+  //   }
+  // }, [profileStatus, triggerNotification]);
+
+  // useEffect(() => {
+  //   if (profileComplete) {
+  //     return;
+  //   }
+  //   setProfileComplete(true); // Set profileComplete to true if not already
+  // }, [profileComplete, setProfileComplete]);
 
   const completeProfile = () => {
     navigate("/registration-complete");
@@ -56,41 +66,23 @@ export default function Dashboard() {
     },
   ];
 
-  if (!profileComplete) {
+  if (profileStatus === "incomplete") {
     return (
       <div className="flex-1 h-full">
         <div className="p-6 rounded-lg w-full shadow-2xl h-auto mb-6 mt-20 sm:p-4 sm:mr-4 sm:mt-12 md:p-6 lg:h-2/3">
           <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-            Welcome {user?.name}
+            Welcome to your dashboard
           </h2>
           <hr className="border-gray-300 mb-4" />
           <div className="flex flex-col items-center">
-            <img
-              className="object-cover w-20 h-20 mt-3 mr-3 rounded-full"
-              src={
-                user?.profileImage ||
-                "https://lh3.googleusercontent.com/a/AEdFTp70cvwI5eevfcr4LonOEX5gB2rzx7JnudOcnYbS1qU=s96-c"
-              }
-              alt="Profile"
-            />
-            <p className="text-gray-600 text-md">
-              Complete your profile to get started
+            <p className="text-[#640D5F] text-md">
+              Access Denied !!. Complete your registration to get started.
             </p>
             <button
               onClick={completeProfile}
-              className="mt-4 bg-[#2C394B] hover:bg-[#3e5679] text-white font-semibold py-2 px-4 rounded"
+              className="mt-4 bg-[#AE445A] hover:bg-[#3e5679] text-white font-semibold py-2 px-4 rounded"
             >
               Complete Profile
-            </button>
-            <button
-              className="mt-4 bg-[#8d2020] hover:bg-[#e73d3d] text-white font-semibold py-2 px-4 rounded"
-              onClick={() => {
-                triggerNotification("Logout successful", "success");
-                logout();
-                navigate("/");
-              }}
-            >
-              Logout
             </button>
           </div>
         </div>
@@ -98,6 +90,26 @@ export default function Dashboard() {
     );
   }
 
+  if (profileStatus === "waiting_approval") {
+    return (
+      <div className="flex-1 h-full">
+        <div className="p-6 rounded-lg w-full shadow-2xl h-auto mb-6 mt-20 sm:p-4 sm:mr-4 sm:mt-12 md:p-6 lg:h-2/3">
+          <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+            Welcome to your dashboard
+          </h2>
+          <hr className="border-gray-300 mb-4" />
+          <div className="flex flex-col items-center">
+            <p className="text-[#640D5F] text-md">
+              Your profile is under review. Please wait for approval to access
+              your dashboard.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main Dashboard Content
   return (
     <div className="flex-1 pt-16 px-8 p-6 h-full">
       <div className="p-6 rounded-lg w-full shadow-2xl h-auto mb-6 mt-20 sm:p-4 sm:mr-4 sm:mt-12 md:p-6 lg:h-2/3">

@@ -6,10 +6,11 @@ import OtpModal from "../components/OtpModal";
 import InputField from "../components/InputField";
 import statesAndDistricts from "../../public/states-and-districts.json";
 import { useAuth } from "../context/UserContext";
+import { useNotification } from "../context/NotificationContext";
 import LOGO from "../assets/ollatoLogo.png";
 
 const Registration = () => {
-  // Single State for Form Data
+  // State Variables
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -18,46 +19,27 @@ const Registration = () => {
     gender: "",
     date_of_birth: "",
     state: "",
-    city: "",
+    district: "",
     password: "",
     confirm_password: "",
   });
 
   const [otp, setOtp] = useState("");
-  const [otpType, setOtpType] = useState(""); // Tracks OTP type ('email' or 'phone')
-
+  const [otpType, setOtpType] = useState("");
   const [otpModal, setOtpModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [message, setMessage] = useState({ text: "", type: "" });
   const [districts, setDistricts] = useState([]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
-  const { setProfileComplete } = useAuth();
+  const { triggerNotification } = useNotification();
   const navigate = useNavigate();
 
-  // API URLs
-  const apiUrls = {
-    sendOtp: {
-      email: import.meta.env.VITE_SEND_EMAIL_OTP_API,
-      phone: import.meta.env.VITE_SEND_MOBILE_OTP_API,
-    },
-    verifyOtp: {
-      email: import.meta.env.VITE_VERIFY_EMAIL_OTP_API,
-      phone: import.meta.env.VITE_VERIFY_MOBILE_OTP_API,
-    },
-  };
-  const personalDetailsURL = import.meta.env.VITE_PERSONAL_DELAILS_API;
+  const API_URL = import.meta.env.VITE_APP_API_ENDPOINT_URL;
 
-  // Utility: Display Messages
-  const handleMessage = (text, type) => {
-    setMessage({ text, type });
-    setTimeout(() => setMessage({ text: "", type: "" }), 3000);
-  };
-
-  // Handle Input Changes
+  // Utility Functions
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -66,7 +48,6 @@ const Registration = () => {
     }));
   };
 
-  // Handle State Selection
   const handleStateChange = (e) => {
     const selectedState = e.target.value;
     const selectedStateData = statesAndDistricts.states.find(
@@ -76,289 +57,186 @@ const Registration = () => {
     setFormData((prevData) => ({
       ...prevData,
       state: selectedState,
-      city: "", // Reset city when state changes
+      district: "", // Reset district when state changes
     }));
     setDistricts(selectedStateData ? selectedStateData.districts : []);
   };
 
-  // Email verification handler
   const handleVerifyEmail = () => {
     if (!formData.email) {
-      handleMessage("Please enter an email address.", "error");
+      triggerNotification("Please enter an email address.", "error");
       return;
     }
-    // sendOtp("email", formData.contactDetails.email);
     sendEmailOtp(formData.email);
-    setOtpType("email"); // Track OTP type as email
+    setOtpType("email");
   };
 
-  // Phone verification handler
   const handleVerifyPhone = () => {
-    if (!formData.phone) {
-      handleMessage("Please enter a phone number.", "error");
+    if (!formData.phone_number) {
+      triggerNotification("Please enter a phone number.", "error");
       return;
     }
-    // sendOtp("phone", contactDetails.phone);
-    sendPhoneOtp(formData.phone); // Send OTP for phone
-    setOtpType("phone"); // Track OTP type as phone
+    sendPhoneOtp(formData.phone_number);
+    setOtpType("phone");
   };
 
-  // Function to send OTP for email
   const sendEmailOtp = async (email) => {
-    const url = apiUrls.sendOtp.email; // API URL for email OTP
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${API_URL}/otp/email-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }), // Send only email
+        body: JSON.stringify({ email }),
       });
-
       if (response.ok) {
-        handleMessage("OTP sent to your email.", "success");
-        setOtpModal(true); // Open the OTP modal
+        triggerNotification("OTP sent to your email.", "success");
+        setOtpModal(true);
       } else {
         const errorData = await response.json();
-        handleMessage(errorData.message || "Failed to send OTP.", "error");
+        triggerNotification(
+          errorData.message || "Failed to send OTP.",
+          "error"
+        );
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      handleMessage("Error sending OTP. Please try again.", "error");
+      triggerNotification("Error sending OTP. Please try again.", "error");
     }
   };
 
-  // Function to send OTP for phone
   const sendPhoneOtp = async (phoneNumber) => {
-    const url = apiUrls.sendOtp.phone; // API URL for phone OTP
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${API_URL}/otp/mobile-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phoneNumber }), // Send only phone number
+        body: JSON.stringify({ phoneNumber }),
       });
-
       if (response.ok) {
-        handleMessage("OTP sent to your phone number.", "success");
-        setOtpModal(true); // Open the OTP modal
+        triggerNotification("OTP sent to your phone.", "success");
+        setOtpModal(true);
       } else {
         const errorData = await response.json();
-        handleMessage(errorData.message || "Failed to send OTP.", "error");
+        triggerNotification(
+          errorData.message || "Failed to send OTP.",
+          "error"
+        );
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      handleMessage("Error sending OTP. Please try again.", "error");
-    }
-  };
-
-  // OTP verification logic for email
-  const handleVerifyEmailOtp = async () => {
-    if (!otp || otp.length !== 4) {
-      handleMessage("Please enter a valid 4-digit OTP.", "error");
-      return;
-    }
-    setIsVerifying(true); // Show verifying state
-    try {
-      const url = apiUrls.verifyOtp.email; // API URL for verifying email OTP
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          enteredOtp: otp,
-          email: formData.contactDetails.email,
-        }), // Send OTP and email to backend
-      });
-
-      if (response.ok) {
-        handleMessage("OTP verified successfully!", "success");
-        setOtpModal(false); // Close the modal
-        setOtp(""); // Clear OTP input
-        completeStep(); // Proceed to next step
-      } else {
-        const errorData = await response.json();
-        handleMessage(
-          errorData.message || "Invalid OTP. Please try again.",
-          "error"
-        );
-      }
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
-      handleMessage(
-        "An error occurred during OTP verification. Please try again.",
-        "error"
-      );
-    } finally {
-      setIsVerifying(false); // Reset verifying state
-    }
-  };
-
-  // OTP verification logic for phone
-  const handleVerifyPhoneOtp = async () => {
-    if (!otp || otp.length !== 4) {
-      handleMessage("Please enter a valid 4-digit OTP.", "error");
-      return;
-    }
-
-    setIsVerifying(true); // Show verifying state
-    try {
-      const url = apiUrls.verifyOtp.phone; // API URL for verifying phone OTP
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          enteredOtp: otp,
-          phoneNumber: formData.contactDetails.phone_number,
-        }), // Send OTP and phone to backend
-      });
-
-      if (response.ok) {
-        handleMessage("OTP verified successfully!", "success");
-        setOtpModal(false); // Close the modal
-        setOtp(""); // Clear OTP input
-        completeStep(); // Proceed to next step
-      } else {
-        const errorData = await response.json();
-        handleMessage(
-          errorData.message || "Invalid OTP. Please try again.",
-          "error"
-        );
-      }
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
-      handleMessage(
-        "An error occurred during OTP verification. Please try again.",
-        "error"
-      );
-    } finally {
-      setIsVerifying(false); // Reset verifying state
+      triggerNotification("Error sending OTP. Please try again.", "error");
     }
   };
 
   const handleOtpVerification = async () => {
     if (!otp || otp.length !== 4) {
-      handleMessage("Please enter a valid 4-digit OTP.", "error");
+      triggerNotification("Please enter a valid 4-digit OTP.", "error");
       return;
     }
+    setIsVerifying(true);
+    const url =
+      otpType === "email"
+        ? `${API_URL}/otp/verify-email-otp`
+        : `${API_URL}/otp/verify-mobile-otp`;
 
-    setIsVerifying(true); // Show verifying state
+    const payload =
+      otpType === "email"
+        ? { enteredOtp: otp, email: formData.email }
+        : { enteredOtp: otp, phoneNumber: formData.phone_number };
+
     try {
-      const url =
-        otpType === "email" ? apiUrls.verifyOtp.email : apiUrls.verifyOtp.phone;
-      const payload =
-        otpType === "email"
-          ? { enteredOtp: otp, email: formData.email }
-          : { enteredOtp: otp, phoneNumber: formData.phone_number };
-
       const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload), // Send OTP and email/phone to backend
-      });
-
-      if (response.ok) {
-        handleMessage("OTP verified successfully!", "success");
-        setOtpModal(false); // Close OTP modal
-        setOtp(""); // Clear OTP input
-
-        // Update verification status
-        if (otpType === "email") {
-          setIsEmailVerified(true);
-        } else {
-          setIsPhoneVerified(true);
-        }
-      } else {
-        const errorData = await response.json();
-        handleMessage(
-          errorData.message || "Invalid OTP. Please try again.",
-          "error"
-        );
-      }
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
-      handleMessage(
-        "An error occurred during OTP verification. Please try again.",
-        "error"
-      );
-    } finally {
-      setIsVerifying(false); // Reset verifying state
-    }
-  };
-
-  // // Handle OTP Verification
-  // const handleOtpVerification = async () => {
-  //   if (!otp || otp.length !== 4)
-  //     return handleMessage("Please enter a valid 4-digit OTP.", "error");
-
-  //   const url =
-  //     otpType === "email" ? apiUrls.verifyOtp.email : apiUrls.verifyOtp.phone;
-  //   const payload =
-  //     otpType === "email"
-  //       ? { enteredOtp: otp, email: formData.email }
-  //       : { enteredOtp: otp, phone: formData.phone_number };
-
-  //   try {
-  //     const response = await fetch(url, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(payload),
-  //     });
-
-  //     if (response.ok) {
-  //       handleMessage("OTP verified successfully!", "success");
-  //       setOtpModal(false);
-  //       setOtp(""); // Clear OTP input
-  //     } else {
-  //       const errorData = await response.json();
-  //       handleMessage(
-  //         errorData.message || "Invalid OTP. Please try again.",
-  //         "error"
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("Error verifying OTP:", error);
-  //     handleMessage("An error occurred during verification.", "error");
-  //   }
-  // };
-  const handlepersonalDetailsSubmit = async (e) => {
-    e.preventDefault();
-
-    const user = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.user_id;
-    console.log("User ID:", userId);
-    // Flatten the form data
-    const payload = {
-      user_id: "user123", // Replace with dynamic user ID
-      first_name: formData.first_name,
-      last_name: formData.last_name,
-      email: formData.email,
-      phone_number: formData.phone_number,
-      gender: formData.gender,
-      date_of_birth: formData.date_of_birth,
-      state: formData.state,
-      district: formData.city,
-      password: formData.password,
-      confirm_password: formData.confirm_password,
-    };
-
-    console.log("personal details - payload", payload);
-
-    try {
-      const response = await fetch(personalDetailsURL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       if (response.ok) {
-        handleMessage("Registration successful!", "success");
-        setProfileComplete(true);
+        triggerNotification("OTP verified successfully!", "success");
+        setOtpModal(false);
+        setOtp("");
+        if (otpType === "email") setIsEmailVerified(true);
+        else setIsPhoneVerified(true);
+      } else {
+        const errorData = await response.json();
+        triggerNotification(errorData.message || "Invalid OTP.", "error");
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      triggerNotification(
+        "An error occurred during OTP verification.",
+        "error"
+      );
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handlePersonalDetailsSubmit = async (e) => {
+    e.preventDefault();
+    const user = JSON.parse(localStorage.getItem("user"));
+    const user_id = user?.user_id || "user123";
+
+    const payload = {
+      user_id: user_id,
+      ...formData,
+    };
+    // console.log("Payload:", payload);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/upload-personal-details`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      // console.log("Response:", response);
+
+      if (response.ok) {
+        triggerNotification("Registration successful!", "success");
         navigate("/");
       } else {
         const errorData = await response.json();
-        handleMessage(errorData.message || "Registration failed.", "error");
+        triggerNotification(
+          errorData.message || "Registration failed.",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error submitting details:", error);
+      triggerNotification("An error occurred during registration.", "error");
+    }
+  };
+  // Handle Personal Details Submission
+  const handlepersonalDetailsSubmit = async (e) => {
+    e.preventDefault();
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.user_id || "user123"; // Replace with dynamic user ID
+
+    const payload = {
+      ...formData,
+      user_id: userId,
+      district: formData.district,
+    };
+
+    try {
+      const response = await fetch(`${API_URL}/auth/upload-personal-details`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        triggerNotification("Registration successful!", "success");
+        navigate("/");
+      } else {
+        const errorData = await response.json();
+        triggerNotification(
+          errorData.message || "Registration failed.",
+          "error"
+        );
       }
     } catch (error) {
       console.error("Error submitting personal details:", error);
-      handleMessage("An error occurred during registration.", "error");
+      triggerNotification("An error occurred during registration.", "error");
     }
-    console.log("Personal details submitted:", formData);
   };
 
   return (
@@ -374,20 +252,9 @@ const Registration = () => {
           <h1 className="text-2xl text-[#2C394B] font-semibold mb-6 text-center">
             Welcome to Registration
           </h1>
-          {/* Message */}
-          {message.text && (
-            <div
-              className={`py-4 px-6 mb-4 rounded ${
-                message.type === "success"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              {message.text}
-            </div>
-          )}
+
           {/* Form */}
-          <form onSubmit={handlepersonalDetailsSubmit}>
+          <form onSubmit={handlePersonalDetailsSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
                 label="First Name"
@@ -492,16 +359,16 @@ const Registration = () => {
                 ))}
               </InputField>
               <InputField
-                label="City"
-                name="city"
-                value={formData.city}
+                label="district"
+                name="district"
+                value={formData.district}
                 handleChange={(e) =>
-                  setFormData((prev) => ({ ...prev, city: e.target.value }))
+                  setFormData((prev) => ({ ...prev, district: e.target.value }))
                 }
                 component="select"
               >
                 <option value="" disabled>
-                  Select City
+                  Select district
                 </option>
                 {districts.map((district) => (
                   <option key={district} value={district}>
@@ -543,12 +410,14 @@ const Registration = () => {
               </div>
             </div>
             <div>
-              <button
-                type="submit"
-                className="w-fit mx-auto bg-[#2C394B] text-white py-2 rounded-md mt-4"
-              >
-                Register
-              </button>
+              <div className="col-span-2 flex justify-center mt-6">
+                <button
+                  type="submit"
+                  className="bg-[#2C394B] text-white py-2 px-6 rounded hover:bg-[#285b45] transition duration-200"
+                >
+                  Register
+                </button>
+              </div>
             </div>
           </form>
         </div>

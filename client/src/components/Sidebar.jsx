@@ -1,38 +1,41 @@
 import React, { useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/UserContext";
 import { RiHome8Line } from "react-icons/ri";
 import { MdAssessment } from "react-icons/md";
 import { LuPackageSearch } from "react-icons/lu";
 import { TbReportAnalytics } from "react-icons/tb";
-import { FaRegFileAlt, FaRegCalendarCheck } from "react-icons/fa";
-import { FaUsersCog, FaUserCog } from "react-icons/fa";
+import { FaUserCog } from "react-icons/fa";
+import { TbReportMoney } from "react-icons/tb";
 import { FaBuildingUser } from "react-icons/fa6";
 import { CgLogOut } from "react-icons/cg";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useNotification } from "../context/NotificationContext";
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
-  const { profileComplete, logout } = useAuth();
+  const { user, profileComplete, logout } = useAuth();
   const { triggerNotification } = useNotification();
   const navigate = useNavigate();
+  console.log("User", user);
 
   // Sidebar items configuration
   const sidebarItems = [
     { label: "Dashboard", icon: <RiHome8Line />, path: "/dashboard" },
-    { label: "Assessment", icon: <MdAssessment />, path: "/assessment" },
-    { label: "Packages", icon: <LuPackageSearch />, path: "/packages" },
-    { label: "Download Summary", icon: <FaRegFileAlt />, path: "/summary" },
-    { label: "Report", icon: <TbReportAnalytics />, path: "/report" },
     {
-      label: "Book Sessions",
-      icon: <FaRegCalendarCheck />,
-      path: "/bookSessions",
+      label: "Availability Management",
+      icon: <MdAssessment />,
+      path: "/availability-management",
     },
     {
-      label: "Sessions Management",
-      icon: <FaUsersCog />,
-      path: "/sessionsManagement",
+      label: "Session Management",
+      icon: <LuPackageSearch />,
+      path: "/session-management",
+    },
+    { label: "Report", icon: <TbReportAnalytics />, path: "/report" },
+    {
+      label: "Revenue Details",
+      icon: <TbReportMoney />,
+      path: "/revenue-details",
     },
     { label: "My Activity", icon: <FaBuildingUser />, path: "/myActivity" },
     { label: "Settings", icon: <FaUserCog />, path: "/settings" },
@@ -61,16 +64,27 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             {sidebarItems.map(({ label, icon, path }) => (
               <li key={path}>
                 <NavLink
-                  to={path}
+                  to={profileComplete ? path : "#"}
                   className={({ isActive }) =>
                     `flex items-center space-x-3 p-3 rounded transition-colors ${
-                      isActive
-                        ? "bg-[#1C325B] text-white"
-                        : "hover:bg-[#6A669D] hover:text-white text-gray-300"
+                      profileComplete
+                        ? isActive
+                          ? "bg-[#1C325B] text-white"
+                          : "hover:bg-[#6A669D] hover:text-white text-gray-300"
+                        : "bg-gray-500 text-gray-400 cursor-not-allowed"
                     }`
                   }
-                  onClick={() => setSidebarOpen(true)} // Ensure sidebar remains open on click
-                  aria-disabled={profileComplete}
+                  // className={({ isActive }) =>
+                  //   `flex items-center space-x-3 p-3 rounded transition-colors ${
+                  //     isActive
+                  //       ? "bg-[#1C325B] text-white"
+                  //       : "hover:bg-[#6A669D] hover:text-white text-gray-300"
+                  //   }`
+                  // }
+                  // onClick={() => setSidebarOpen(true)} // Ensure sidebar remains open on click
+                  onClick={(e) => {
+                    if (!profileComplete) e.preventDefault(); // Prevent navigation if profile is incomplete
+                  }}
                 >
                   <span className="text-lg">{icon}</span>
                   {sidebarOpen && <span>{label}</span>}

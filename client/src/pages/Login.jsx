@@ -20,8 +20,6 @@ function Login() {
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // const [notification, setNotification] = useState({ message: "", type: "" });
-
   const login_Url = import.meta.env.VITE_LOGIN_API;
   const send_mobile_otp_Url = import.meta.env.VITE_SEND_MOBILE_OTP_API;
   const verify_mobile_otp_Url = import.meta.env.VITE_VERIFY_MOBILE_OTP_API;
@@ -54,6 +52,7 @@ function Login() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log("Login Response:", data);
 
         // Validate if expected response data exists
         if (data.user) {
@@ -64,10 +63,6 @@ function Login() {
         } else {
           triggerNotification("Unexpected response format.", "error");
         }
-        // localStorage.setItem("token", data.token);
-        // login(data.user); // Save user in context
-        // triggerNotification("Login successful! Redirecting...", "success");
-        // navigate("/dashboard");
       } else {
         const errorData = await response.json();
         triggerNotification(

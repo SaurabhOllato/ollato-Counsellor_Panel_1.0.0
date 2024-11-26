@@ -2,26 +2,40 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/UserContext";
 import InputField from "../components/InputField";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../context/NotificationContext";
 
 const RegistrationDetails = () => {
-  // State for professional details (Step 1)
+  const navigate = useNavigate();
+  const {
+    user,
+    completedSteps,
+    updateCompletedSteps,
+    profileStatus,
+    updateProfileStatus,
+  } = useAuth();
+  const { triggerNotification } = useNotification();
+
+  const [currentStep, setCurrentStep] = useState(1);
+  // const [stepLocked, setStepLocked] = useState(false);
+
+  // Step 1: Professional Details State
   const [educationDetails, setEducationDetails] = useState({
-    licenseNumber: "",
+    license_number: "",
     qualification: "",
     specification: "",
     experience: "",
   });
 
-  // State for documentation details (Step 2)
+  // Step 2: Documentation Details State
   const [documentation, setDocumentation] = useState({
-    profilePic: null,
-    degreeCertificate: null,
+    profile_pic: null,
+    degree_certificate: null,
     resume: null,
-    aadharNumber: "",
-    aadharFront: null,
-    aadharBack: null,
-    panNumber: "",
-    panCard: null,
+    aadhar_number: "",
+    aadhar_card_front: null,
+    aadhar_card_back: null,
+    pan_number: "",
+    pan_card: null,
     signature: null,
     expertise: {
       careerCounsellor: false,
@@ -30,238 +44,202 @@ const RegistrationDetails = () => {
     },
   });
 
-  const { setProfileComplete } = useAuth(); // Context for user profile completion
-  const navigate = useNavigate();
-
-  const [currentStep, setCurrentStep] = useState(1); // Track current registration step
-  const [message, setMessage] = useState({ text: "", type: "" });
-  const [stepLocked, setStepLocked] = useState(false); // Lock steps once submitted
-
   // Backend API endpoints
-  const professionalDetailsURL = import.meta.env.VITE_PROFESSIONAL_DELAILS_API;
-  const documentationURL = import.meta.env.VITE_DOCUMENTS_UPLOAD_API;
-  // console.log("professionalDetailsURL", professionalDetailsURL);
-  // console.log("documentationURL", documentationURL);
+  const API_URL = import.meta.env.VITE_APP_API_ENDPOINT_URL;
 
-  // Steps for progress tracking
+  // Progress bar steps
   const steps = [
     { id: 1, title: "Professional Information" },
     { id: 2, title: "Documentation Profile" },
   ];
 
-  // Check if step 1 or 2  is completed and redirect to dashboard
-  useEffect(() => {
-    const step1Completed = localStorage.getItem("step1Completed");
-    const step2Completed = localStorage.getItem("step2Completed");
-    if (step1Completed === "true") {
-      setCurrentStep(2);
-    }else if(step2Completed === "true"){
-      navigate("/dashboard");
-    }else{
-      navigate("dashboard");
-    }
-  }, []);
-
   // Calculate progress percentage
   const progressPercentage = (currentStep / steps.length) * 100;
 
-  // Navigate between steps
-  const handleStepClick = (stepId) => {
-    if (stepId <= currentStep && !stepLocked) {
-      setCurrentStep(stepId);
+  // useEffect(() => {
+  //   if (!user) {
+  //     triggerNotification("User is not logged in.", "error");
+  //     navigate("/login");
+  //   }
+  // }, [user, navigate, triggerNotification]);
+
+  useEffect(() => {
+    if (profileStatus === "approved") {
+      navigate("/dashboard");
+    } else if (completedSteps.includes(1)) {
+      setCurrentStep(2);
     }
+  }, [profileStatus, completedSteps, navigate]);
+
+  // Navigation between steps
+  const handleStepClick = (stepId) => {
+    if (stepId <= currentStep) setCurrentStep(stepId);
   };
 
-  // Handle input change for text inputs
+  // Input change handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setDocumentation((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setDocumentation((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle file changes for file inputs
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    if (files && files[0]) {
-      setDocumentation((prev) => ({
-        ...prev,
-        [name]: files[0],
-      }));
+    if (files?.[0]) {
+      setDocumentation((prev) => ({ ...prev, [name]: files[0] }));
     }
   };
 
-  // Handle checkbox changes for expertise options
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
     setDocumentation((prev) => ({
       ...prev,
-      expertise: {
-        ...prev.expertise,
-        [name]: checked,
-      },
+      expertise: { ...prev.expertise, [name]: checked },
     }));
-    // console.log("Checkbox changed:", name, checked);
   };
 
-  // Submit professional details (Step 1)
+  // Step 1: Submit Professional Details
   const handleProfessionalSubmit = async (e) => {
     e.preventDefault();
 
-    // Ensure step is not locked
-    if (stepLocked) {
-      setCurrentStep(2);
+    if (completedSteps.includes(1)) {
+      triggerNotification("This details is already completed.", "error");
+      return;
+    }
+    const user_id = user?.user_id || 123;
+    console.log("User ID:", user_id);
+
+    if (!user_id) {
+      triggerNotification("User id  is missing. Please log in again.", "error");
       return;
     }
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.user_id;
-
-    // Validate user session
-    if (!userId) {
-      handleMessage("User is not logged in. Please log in again.", "error");
+    const { license_number, qualification, specification, experience } =
+      educationDetails;
+    if (!license_number || !qualification || !specification || !experience) {
+      triggerNotification("Please fill all required fields.", "error");
       return;
     }
+    const payload = {
+      user_id,
+      license_number,
+      qualification,
+      specification,
+      experience,
+    };
 
-    // Validate inputs
-    if (
-      !educationDetails.licenseNumber ||
-      !educationDetails.qualification ||
-      !educationDetails.specification ||
-      !educationDetails.experience
-    ) {
-      handleMessage("Please fill all required fields.", "error");
-      return;
-    }
     try {
-      const response = await fetch(professionalDetailsURL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          license_number: educationDetails.licenseNumber,
-          qualification: educationDetails.qualification,
-          specification: educationDetails.specification,
-          experience: educationDetails.experience,
-        }),
-      });
+      const response = await fetch(
+        `${API_URL}/auth/upload-professional-details`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+      console.log("Professional Response:", response);
 
       if (response.ok) {
-        const responseData = await response.json();
-        localStorage.setItem("step1Completed", "true");
-        handleMessage(
+        updateCompletedSteps(1);
+        triggerNotification(
           "Professional details submitted successfully!",
           "success"
         );
-        setCurrentStep(2); // Move to step 2
+        setCurrentStep(2);
       } else {
         const errorData = await response.json();
-        handleMessage(errorData.message, "error");
+        console.error("Server Error:", errorData);
+        triggerNotification(errorData.message, "error");
       }
     } catch (error) {
-      console.error("Error during professional details submission", error);
+      console.error("Error submitting professional details:", error);
+      triggerNotification("An unexpected error occurred.", "error");
     }
   };
 
-  // Submit documentation details (Step 2)
+  // Step 2: Submit Documentation Details
   const handleDocumentationSubmit = async (e) => {
     e.preventDefault();
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.user_id;
+    const user_id = user?.user_id || 123;
 
-    // Validate user session
-    if (!userId) {
-      handleMessage("User is not logged in. Please log in again.", "error");
+    if (!user_id) {
+      triggerNotification(
+        "User is not logged in. Please log in again.",
+        "error"
+      );
       return;
     }
 
-    // Validate inputs
+    const {
+      profile_pic,
+      degree_certificate,
+      resume,
+      aadhar_number,
+      aadhar_card_front,
+      aadhar_card_back,
+      pan_number,
+      pan_card,
+      signature,
+      expertise,
+    } = documentation;
+
     if (
-      !documentation.profilePic ||
-      !documentation.degreeCertificate ||
-      !documentation.resume ||
-      !documentation.aadharNumber ||
-      !documentation.aadharFront ||
-      !documentation.aadharBack ||
-      !documentation.panNumber ||
-      !documentation.panCard ||
-      !documentation.signature
+      !profile_pic ||
+      !degree_certificate ||
+      !resume ||
+      !aadhar_number ||
+      !aadhar_card_front ||
+      !aadhar_card_back ||
+      !pan_number ||
+      !pan_card ||
+      !signature
     ) {
-      handleMessage(
+      triggerNotification(
         "Please fill all required fields and upload all documents.",
         "error"
       );
       return;
     }
 
-    // Prepare FormData for submission
     const formData = new FormData();
-    formData.append("user_id", userId);
-    formData.append("profile_pic", documentation.profilePic);
-    formData.append("degree_certificate", documentation.degreeCertificate);
-    formData.append("resume", documentation.resume);
-    formData.append("aadhar_number", documentation.aadharNumber);
-    formData.append("aadhar_card_front", documentation.aadharFront);
-    formData.append("aadhar_card_back", documentation.aadharBack);
-    formData.append("pan_number", documentation.panNumber);
-    formData.append("pan_card", documentation.panCard);
-    formData.append("signature", documentation.signature);
-    formData.append(
-      "professional_expertise",
-      JSON.stringify(documentation.expertise)
-    );
+    formData.append("user_id", user_id);
+    formData.append("profile_pic", profile_pic);
+    formData.append("degree_certificate", degree_certificate);
+    formData.append("resume", resume);
+    formData.append("aadhar_number", aadhar_number);
+    formData.append("aadhar_card_front", aadhar_card_front);
+    formData.append("aadhar_card_back", aadhar_card_back);
+    formData.append("pan_number", pan_number);
+    formData.append("pan_card", pan_card);
+    formData.append("signature", signature);
+    formData.append("professional_expertise", JSON.stringify(expertise));
 
-    // Submit to backend
     try {
-      const response = await fetch(documentationURL, {
+      const response = await fetch(`${API_URL}/auth/upload-documents`, {
         method: "POST",
         body: formData,
       });
 
       if (response.ok) {
-        handleMessage("Documentation submitted successfully!", "success");
-        setProfileComplete(true);
-        localStorage.setItem("step2Completed", "true");
+        updateCompletedSteps(2);
+        updateProfileStatus("waiting_approval"); // Update profile status
+        triggerNotification("Documentation submitted successfully!", "success");
         navigate("/dashboard");
       } else {
         const errorData = await response.json();
-        handleMessage(errorData.message, "error");
+        triggerNotification(errorData.message, "error");
       }
     } catch (error) {
-      console.error("Error during documentation submission", error);
+      console.error("Error submitting documentation:", error);
     }
   };
 
-  // Display messages to the user
-  const handleMessage = (text, type) => {
-    setMessage({ text, type });
-    setTimeout(() => setMessage({ text: "", type: "" }), 3000);
-  };
-
   return (
-    <div className="w-full h-full p-10 md:p-8 flex flex-col overflow-y-auto ml-40">
+    <div className="w-full h-full p-10 md:p-8 flex flex-col overflow-y-auto">
       <div className="bg-white p-8 rounded-lg shadow-lg mx-auto w-full">
         <h1 className="text-2xl text-[#2C394B] font-semibold mb-6 text-center">
-          Registration
+          Registration Details
         </h1>
-
-        {/* Display messages */}
-        {message.text && (
-          <div
-            className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-10 py-4 rounded-md text-md font-medium ${
-              message.type === "success"
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800"
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
-
         {/* Steps */}
         <div className="mb-6">
           <div className="flex items-center mb-3">
@@ -272,7 +250,7 @@ const RegistrationDetails = () => {
                   step.id === currentStep
                     ? "text-[#2C394B]"
                     : step.id < currentStep
-                    ? "text-green-500"
+                    ? "text-[#2fa047]"
                     : "text-gray-400"
                 }`}
                 onClick={() => handleStepClick(step.id)}
@@ -297,13 +275,13 @@ const RegistrationDetails = () => {
           >
             <InputField
               label="License Number *"
-              name="licenseNumber"
+              name="license_number"
               placeholder="Enter License Number"
-              value={educationDetails.licenseNumber}
+              value={educationDetails.license_number}
               handleChange={(e) =>
                 setEducationDetails((prev) => ({
                   ...prev,
-                  licenseNumber: e.target.value,
+                  license_number: e.target.value,
                 }))
               }
             />
@@ -362,13 +340,13 @@ const RegistrationDetails = () => {
           >
             <InputField
               label="Upload Profile Picture *"
-              name="profilePic"
+              name="profile_pic"
               type="file"
               handleChange={handleFileChange}
             />
             <InputField
               label="Upload Degree Certificate *"
-              name="degreeCertificate"
+              name="degree_certificate"
               type="file"
               handleChange={handleFileChange}
             />
@@ -380,33 +358,33 @@ const RegistrationDetails = () => {
             />
             <InputField
               label="Aadhar Number *"
-              name="aadharNumber"
+              name="aadhar_number"
               placeholder="Enter Aadhar Number"
-              value={documentation.aadharNumber}
+              value={documentation.aadhar_number}
               handleChange={handleChange}
             />
             <InputField
               label="Upload Aadhar Card Front *"
-              name="aadharFront"
+              name="aadhar_card_front"
               type="file"
               handleChange={handleFileChange}
             />
             <InputField
               label="Upload Aadhar Card Back *"
-              name="aadharBack"
+              name="aadhar_card_back"
               type="file"
               handleChange={handleFileChange}
             />
             <InputField
               label="PAN Number *"
-              name="panNumber"
+              name="pan_number"
               placeholder="Enter PAN Number"
-              value={documentation.panNumber}
+              value={documentation.pan_number}
               handleChange={handleChange}
             />
             <InputField
               label="Upload PAN Card *"
-              name="panCard"
+              name="pan_card"
               type="file"
               handleChange={handleFileChange}
             />
