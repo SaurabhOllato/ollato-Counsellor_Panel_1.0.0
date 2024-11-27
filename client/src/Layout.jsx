@@ -10,7 +10,7 @@ function Layout({ children }) {
       <div className="layout-content flex-1 flex flex-col">
         <Header />
         <main
-          className={`layout-main flex-1 overflow-y-auto p-6 pt-10 bg-gray-100 scrollbar-custom transition-all duration-300 ${
+          className={`layout-main flex-1 overflow-y-auto p-6 pt-10 bg-gray-100 scrollbar-custom transition-all duration-300 mt-16 ${
             sidebarOpen ? "ml-64" : "ml-20"
           }`}
         >

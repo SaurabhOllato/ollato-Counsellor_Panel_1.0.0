@@ -4,9 +4,8 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 const UserContext = createContext({
   user: null,
   profileComplete: false,
-  profileStatus: "incomplete",
+  profileStatus: "pending",
   completedSteps: [],
-  isDashboardAccessible: false,
   login: () => {},
   logout: () => {},
   updateProfileStatus: () => {},
@@ -19,23 +18,31 @@ export const UserProvider = ({ children }) => {
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
+  // three options: "pending",waiting_approval ,"approved" for profileStatus
   const [profileStatus, setProfileStatus] = useState(() => {
-    return localStorage.getItem("profileStatus") || "incomplete";
-  }); // three options: "incomplete",waiting_approval ,"approved"
+    return localStorage.getItem("profileStatus") || "pending";
+  });
 
+  // completedSteps is an array of strings representing completed steps in the registration process
   const [completedSteps, setCompletedSteps] = useState(() => {
     const storedSteps = localStorage.getItem("completedSteps");
     return storedSteps ? JSON.parse(storedSteps) : [];
   });
 
+  // profileComplete is a boolean indicating whether the user's profile is complete
   const [profileComplete, setProfileComplete] = useState(() => {
     return profileStatus === "approved";
   });
 
-  const isDashboardAccessible =
-    profileStatus === "approved" &&
-    completedSteps.includes("emailVerified") &&
-    completedSteps.includes("phoneVerified");
+  // const isDashboardAccessible =
+  //   profileStatus === "approved" &&
+  //   completedSteps.includes("emailVerified") &&
+  //   completedSteps.includes("phoneVerified");
+
+  //helper functions to update states - testing
+  const approveProfile = () => {
+    updateProfileStatus("approved");
+  };
 
   useEffect(() => {
     if (user) localStorage.setItem("user", JSON.stringify(user));
@@ -53,7 +60,7 @@ export const UserProvider = ({ children }) => {
 
   const login = (userData) => {
     setUser(userData);
-    setProfileStatus(userData.profileStatus || "incomplete");
+    setProfileStatus(userData.profileStatus || "pending");
     setCompletedSteps(userData.completedSteps || []);
   };
 
@@ -69,6 +76,11 @@ export const UserProvider = ({ children }) => {
 
   const updateProfileStatus = (newStatus) => {
     setProfileStatus(newStatus);
+    if (newStatus === "approved") {
+      setProfileComplete(true);
+    } else {
+      setProfileComplete(false);
+    }
     localStorage.setItem("profileStatus", newStatus);
   };
 
@@ -87,11 +99,11 @@ export const UserProvider = ({ children }) => {
         profileComplete,
         profileStatus,
         completedSteps,
-        isDashboardAccessible,
         login,
         logout,
         updateProfileStatus,
         updateCompletedSteps,
+        approveProfile, //testing - will be removed
       }}
     >
       {children}

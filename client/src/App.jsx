@@ -14,6 +14,7 @@ import Layout from "./Layout";
 import ErrorPage from "./error-page.jsx";
 import RegistrationDetails from "./pages/RegistrationDetails.jsx";
 import SupportForm from "./components/SupportForm.jsx";
+import AvailabilityManagements from "./pages/AvailabilityManagements.jsx";
 function App() {
   // console.log(import.meta.env.VITE_PERSONAL_DELAILS_API);
 
@@ -74,6 +75,17 @@ function App() {
                 <PrivateRoute>
                   <Layout>
                     <SupportForm />
+                  </Layout>
+                </PrivateRoute>
+              }
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/availability-management"
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <AvailabilityManagements />
                   </Layout>
                 </PrivateRoute>
               }
