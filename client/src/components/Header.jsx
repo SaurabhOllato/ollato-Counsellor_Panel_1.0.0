@@ -20,6 +20,7 @@ function Header() {
   const handleProfileClick = () => {
     console.log("Profile clicked");
     // Navigate to profile page if needed
+    navigate("/profile");
   };
 
   const handleLogout = () => {
@@ -53,7 +54,7 @@ function Header() {
   }, []);
 
   return (
-    <nav className="fixed top-0 left-0 z-50 w-full bg-[#536493] text-white shadow-lg px-10">
+    <nav className="fixed top-0 left-0 z-50 w-full bg-[#424153] text-white shadow-lg px-10">
       <div className="px-3 py-3 lg:px-5">
         <div className="flex items-center justify-between">
           {/* Left Section: Logo and Toggle */}

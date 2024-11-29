@@ -35,259 +35,259 @@ function AvailabilityManagements() {
   const slotsPerPage = 10;
 
   // Fetch availability slots from backend (mocked for now)
-  // useEffect(() => {
-  //   const fetchAvailability = async () => {
-  //     // Simulate an API call
-  //     const mockData = [
-  //       {
-  //         id: 1,
-  //         date: "2024-11-28",
-  //         day: "Thursday",
-  //         time: "10:00 AM",
-  //         mode: "video",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 2,
-  //         date: "2024-11-29",
-  //         day: "Friday",
-  //         time: "2:00 PM",
-  //         mode: "call",
-  //         duration: 20,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 3,
-  //         date: "2024-12-01",
-  //         day: "Sunday",
-  //         time: "3:00 PM",
-  //         mode: "video",
-  //         duration: 45,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 4,
-  //         date: "2024-12-02",
-  //         day: "Monday",
-  //         time: "9:30 AM",
-  //         mode: "call",
-  //         duration: 15,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 5,
-  //         date: "2024-12-03",
-  //         day: "Tuesday",
-  //         time: "11:00 AM",
-  //         mode: "video",
-  //         duration: 60,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 6,
-  //         date: "2024-12-04",
-  //         day: "Wednesday",
-  //         time: "1:00 PM",
-  //         mode: "call",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 7,
-  //         date: "2024-12-05",
-  //         day: "Thursday",
-  //         time: "3:00 PM",
-  //         mode: "video",
-  //         duration: 45,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 8,
-  //         date: "2024-12-06",
-  //         day: "Friday",
-  //         time: "5:00 PM",
-  //         mode: "call",
-  //         duration: 15,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 9,
-  //         date: "2024-12-07",
-  //         day: "Saturday",
-  //         time: "7:00 PM",
-  //         mode: "video",
-  //         duration: 60,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 10,
-  //         date: "2024-12-08",
-  //         day: "Sunday",
-  //         time: "9:00 PM",
-  //         mode: "call",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 11,
-  //         date: "2024-11-28",
-  //         day: "Thursday",
-  //         time: "10:00 AM",
-  //         mode: "video",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 12,
-  //         date: "2024-11-29",
-  //         day: "Friday",
-  //         time: "2:00 PM",
-  //         mode: "call",
-  //         duration: 20,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 13,
-  //         date: "2024-12-01",
-  //         day: "Sunday",
-  //         time: "3:00 PM",
-  //         mode: "video",
-  //         duration: 45,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 14,
-  //         date: "2024-12-02",
-  //         day: "Monday",
-  //         time: "9:30 AM",
-  //         mode: "call",
-  //         duration: 15,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 15,
-  //         date: "2024-12-03",
-  //         day: "Tuesday",
-  //         time: "11:00 AM",
-  //         mode: "video",
-  //         duration: 60,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 16,
-  //         date: "2024-12-04",
-  //         day: "Wednesday",
-  //         time: "1:00 PM",
-  //         mode: "call",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 17,
-  //         date: "2024-12-05",
-  //         day: "Thursday",
-  //         time: "3:00 PM",
-  //         mode: "video",
-  //         duration: 45,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 18,
-  //         date: "2024-12-06",
-  //         day: "Friday",
-  //         time: "5:00 PM",
-  //         mode: "call",
-  //         duration: 15,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 19,
-  //         date: "2024-12-07",
-  //         day: "Saturday",
-  //         time: "7:00 PM",
-  //         mode: "video",
-  //         duration: 60,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 20,
-  //         date: "2024-12-08",
-  //         day: "Sunday",
-  //         time: "9:00 PM",
-  //         mode: "call",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 20,
-  //         date: "2024-12-08",
-  //         day: "Sunday",
-  //         time: "9:00 PM",
-  //         mode: "call",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 20,
-  //         date: "2024-12-08",
-  //         day: "Sunday",
-  //         time: "9:00 PM",
-  //         mode: "call",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 20,
-  //         date: "2024-12-08",
-  //         day: "Sunday",
-  //         time: "9:00 PM",
-  //         mode: "call",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 20,
-  //         date: "2024-12-08",
-  //         day: "Sunday",
-  //         time: "9:00 PM",
-  //         mode: "call",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 20,
-  //         date: "2024-12-08",
-  //         day: "Sunday",
-  //         time: "9:00 PM",
-  //         mode: "call",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 20,
-  //         date: "2024-12-08",
-  //         day: "Sunday",
-  //         time: "9:00 PM",
-  //         mode: "call",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //       {
-  //         id: 20,
-  //         date: "2024-12-08",
-  //         day: "Sunday",
-  //         time: "9:00 PM",
-  //         mode: "call",
-  //         duration: 30,
-  //         status: "Available",
-  //       },
-  //     ];
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      // Simulate an API call
+      const mockData = [
+        {
+          id: 1,
+          date: "2024-11-28",
+          day: "Thursday",
+          time: "10:00 AM",
+          mode: "video",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 2,
+          date: "2024-11-29",
+          day: "Friday",
+          time: "2:00 PM",
+          mode: "call",
+          duration: 20,
+          status: "Available",
+        },
+        {
+          id: 3,
+          date: "2024-12-01",
+          day: "Sunday",
+          time: "3:00 PM",
+          mode: "video",
+          duration: 45,
+          status: "Available",
+        },
+        {
+          id: 4,
+          date: "2024-12-02",
+          day: "Monday",
+          time: "9:30 AM",
+          mode: "call",
+          duration: 15,
+          status: "Available",
+        },
+        {
+          id: 5,
+          date: "2024-12-03",
+          day: "Tuesday",
+          time: "11:00 AM",
+          mode: "video",
+          duration: 60,
+          status: "Available",
+        },
+        {
+          id: 6,
+          date: "2024-12-04",
+          day: "Wednesday",
+          time: "1:00 PM",
+          mode: "call",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 7,
+          date: "2024-12-05",
+          day: "Thursday",
+          time: "3:00 PM",
+          mode: "video",
+          duration: 45,
+          status: "Available",
+        },
+        {
+          id: 8,
+          date: "2024-12-06",
+          day: "Friday",
+          time: "5:00 PM",
+          mode: "call",
+          duration: 15,
+          status: "Available",
+        },
+        {
+          id: 9,
+          date: "2024-12-07",
+          day: "Saturday",
+          time: "7:00 PM",
+          mode: "video",
+          duration: 60,
+          status: "Available",
+        },
+        {
+          id: 10,
+          date: "2024-12-08",
+          day: "Sunday",
+          time: "9:00 PM",
+          mode: "call",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 11,
+          date: "2024-11-28",
+          day: "Thursday",
+          time: "10:00 AM",
+          mode: "video",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 12,
+          date: "2024-11-29",
+          day: "Friday",
+          time: "2:00 PM",
+          mode: "call",
+          duration: 20,
+          status: "Available",
+        },
+        {
+          id: 13,
+          date: "2024-12-01",
+          day: "Sunday",
+          time: "3:00 PM",
+          mode: "video",
+          duration: 45,
+          status: "Available",
+        },
+        {
+          id: 14,
+          date: "2024-12-02",
+          day: "Monday",
+          time: "9:30 AM",
+          mode: "call",
+          duration: 15,
+          status: "Available",
+        },
+        {
+          id: 15,
+          date: "2024-12-03",
+          day: "Tuesday",
+          time: "11:00 AM",
+          mode: "video",
+          duration: 60,
+          status: "Available",
+        },
+        {
+          id: 16,
+          date: "2024-12-04",
+          day: "Wednesday",
+          time: "1:00 PM",
+          mode: "call",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 17,
+          date: "2024-12-05",
+          day: "Thursday",
+          time: "3:00 PM",
+          mode: "video",
+          duration: 45,
+          status: "Available",
+        },
+        {
+          id: 18,
+          date: "2024-12-06",
+          day: "Friday",
+          time: "5:00 PM",
+          mode: "call",
+          duration: 15,
+          status: "Available",
+        },
+        {
+          id: 19,
+          date: "2024-12-07",
+          day: "Saturday",
+          time: "7:00 PM",
+          mode: "video",
+          duration: 60,
+          status: "Available",
+        },
+        {
+          id: 20,
+          date: "2024-12-08",
+          day: "Sunday",
+          time: "9:00 PM",
+          mode: "call",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 20,
+          date: "2024-12-08",
+          day: "Sunday",
+          time: "9:00 PM",
+          mode: "call",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 20,
+          date: "2024-12-08",
+          day: "Sunday",
+          time: "9:00 PM",
+          mode: "call",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 20,
+          date: "2024-12-08",
+          day: "Sunday",
+          time: "9:00 PM",
+          mode: "call",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 20,
+          date: "2024-12-08",
+          day: "Sunday",
+          time: "9:00 PM",
+          mode: "call",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 20,
+          date: "2024-12-08",
+          day: "Sunday",
+          time: "9:00 PM",
+          mode: "call",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 20,
+          date: "2024-12-08",
+          day: "Sunday",
+          time: "9:00 PM",
+          mode: "call",
+          duration: 30,
+          status: "Available",
+        },
+        {
+          id: 20,
+          date: "2024-12-08",
+          day: "Sunday",
+          time: "9:00 PM",
+          mode: "call",
+          duration: 30,
+          status: "Available",
+        },
+      ];
 
-  //     setAvailability(mockData);
-  //   };
-  //   fetchAvailability();
-  // }, [setAvailability, showAvailabilityTable]);
+      setAvailability(mockData);
+    };
+    fetchAvailability();
+  }, [setAvailability, showAvailabilityTable]);
 
   const resetForm = () => {
     setFormData({
@@ -360,6 +360,9 @@ function AvailabilityManagements() {
     }
     setSortConfig({ key, direction });
   };
+
+  
+  
   const addSlot = (newSlot) => {
     setAvailability((prev) => [...prev, newSlot]);
     triggerNotification("Slot added successfully!", "success");
@@ -941,6 +944,182 @@ const AvailabilityTable = ({
   setCurrentPage,
 }) => {
   return (
+    // <section className="bg-white antialiased">
+    //   {/* Search Bar */}
+    //   <div className="w-full max-w-sm min-w-[200px] px-6">
+    //     <div className="relative border border-[#85A98F] rounded-sm">
+    //       <input
+    //         type="text"
+    //         placeholder="Search sessions..."
+    //         value={searchQuery}
+    //         onChange={(e) => setSearchQuery(e.target.value)}
+    //         aria-label="Search sessions"
+    //         className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-[#D3F1DF] pl-3 pr-28 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+    //       />
+    //       <button
+    //         className="absolute top-1 right-1 flex items-center rounded bg-slate-800 py-1 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+    //         type="button"
+    //       >
+    //         <svg
+    //           xmlns="http://www.w3.org/2000/svg"
+    //           viewBox="0 0 24 24"
+    //           fill="currentColor"
+    //           className="w-4 h-4 mr-2"
+    //         >
+    //           <path
+    //             fillRule="evenodd"
+    //             d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z"
+    //             clipRule="evenodd"
+    //           />
+    //         </svg>
+    //         Search
+    //       </button>
+    //     </div>
+    //   </div>
+
+    //   <div className="max-w-screen-xl px-4 py-6 mx-auto lg:px-6 sm:py-16 lg:py-4">
+    //     <div className="overflow-x-auto mt-6">
+    //       <table className="min-w-full table-auto border-collapse border border-gray-300">
+    //         <thead>
+    //           <tr className="bg-gray-100">
+    //             {[
+    //               { key: "sr_no", label: "Sr. No." },
+    //               { key: "date", label: "Date" },
+    //               { key: "day", label: "Day" },
+    //               { key: "time", label: "Time" },
+    //               { key: "mode", label: "Mode" },
+    //               { key: "duration", label: "Duration" },
+    //               { key: "status", label: "Status" },
+    //             ].map((col) => (
+    //               <th
+    //                 key={col.key}
+    //                 className={`border border-gray-300 px-4 py-2 text-gray-700 cursor-pointer select-none ${
+    //                   sortConfig.key === col.key
+    //                     ? sortConfig.direction === "ascending"
+    //                       ? "bg-gray-200"
+    //                       : "bg-gray-300"
+    //                     : "hover:bg-gray-100"
+    //                 }`}
+    //                 onClick={() => handleSort(col.key)}
+    //               >
+    //                 {col.label}
+    //                 {sortConfig.key === col.key && (
+    //                   <span
+    //                     className={`ml-2 ${
+    //                       sortConfig.direction === "ascending"
+    //                         ? "text-blue-500"
+    //                         : "text-red-500"
+    //                     } text-sm`}
+    //                   >
+    //                     {sortConfig.direction === "ascending" ? "▲" : "▼"}
+    //                   </span>
+    //                 )}
+    //               </th>
+    //             ))}
+    //             <th
+    //               className="border border-gray-300 px-4 py-2 text-gray-700"
+    //               colSpan="2"
+    //             >
+    //               Actions
+    //             </th>
+    //           </tr>
+    //         </thead>
+    //         <tbody>
+    //           {currentSlots.length > 0 ? (
+    //             currentSlots.map((slot, index) => (
+    //               <tr key={slot.id} className="hover:bg-gray-50">
+    //                 <td className="border border-gray-300 px-4 py-2 text-gray-700">
+    //                   {index + 1}
+    //                 </td>
+    //                 <td className="border border-gray-300 px-4 py-2 text-gray-700">
+    //                   {slot.date}
+    //                 </td>
+    //                 <td className="border border-gray-300 px-4 py-2 text-gray-700">
+    //                   {slot.day}
+    //                 </td>
+    //                 <td className="border border-gray-300 px-4 py-2 text-gray-700">
+    //                   {slot.time}
+    //                 </td>
+    //                 <td className="border border-gray-300 px-4 py-2 text-gray-700">
+    //                   {slot.mode}
+    //                 </td>
+    //                 <td className="border border-gray-300 px-4 py-2 text-gray-700">
+    //                   {slot.duration} mins
+    //                 </td>
+    //                 <td className="border border-gray-300 px-4 py-2">
+    //                   <span
+    //                     className={`py-1 px-2 rounded text-white text-sm ${
+    //                       slot.status === "Available"
+    //                         ? "bg-[#347928]"
+    //                         : "bg-gray-500"
+    //                     } hover:text-[#001F3F]`}
+    //                     onClick={() => {
+    //                       setCurrentSlot(slot);
+    //                       setShowStatusModal(true);
+    //                     }}
+    //                   >
+    //                     {slot.status}
+    //                   </span>
+    //                 </td>
+    //                 <td className="border border-gray-300 px-4 py-2 text-gray-700">
+    //                   <button
+    //                     onClick={() => handleEditSlot(slot)}
+    //                     className="bg-[#FFBD73] hover:bg-yellow-600 text-[#001F3F] font-medium py-1 px-3 rounded mr-2 flex items-center"
+    //                   >
+    //                     Edit
+    //                     <CiEdit />
+    //                   </button>
+    //                 </td>
+    //                 <td className="border border-gray-300 px-4 py-2 text-gray-700">
+    //                   <button
+    //                     onClick={() => handleDeleteSlot(slot.id)}
+    //                     className="bg-[#AE445A] hover:bg-[#FF4545] text-[#001F3F] font-medium py-1 px-3 rounded flex items-center"
+    //                   >
+    //                     Delete
+    //                     <MdDeleteForever />
+    //                   </button>
+    //                 </td>
+    //               </tr>
+    //             ))
+    //           ) : (
+    //             <tr>
+    //               <td
+    //                 colSpan="8"
+    //                 className="text-center p-4 text-gray-500 font-medium"
+    //               >
+    //                 No sessions found.
+    //               </td>
+    //             </tr>
+    //           )}
+    //         </tbody>
+    //       </table>
+
+    //       {/* Pagination */}
+    //       {totalPages > 1 && (
+    //         <div className="flex justify-center mt-4">
+    //           <button
+    //             onClick={() => setCurrentPage((prev) => prev - 1)}
+    //             disabled={currentPage === 1}
+    //             className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-l"
+    //           >
+    //             <MdFirstPage />
+    //           </button>
+    //           <span className="mx-4">
+    //             Page {currentPage} of {totalPages}
+    //           </span>
+    //           <button
+    //             onClick={() => setCurrentPage((prev) => prev + 1)}
+    //             disabled={currentPage === totalPages}
+    //             className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-r"
+    //           >
+    //             <MdLastPage />
+    //           </button>
+    //         </div>
+    //       )}
+    //     </div>
+    //   </div>
+    // </section>
+
     <section className="bg-white antialiased">
       {/* Search Bar */}
       <div className="w-full max-w-sm min-w-[200px] px-6">
@@ -976,9 +1155,9 @@ const AvailabilityTable = ({
 
       <div className="max-w-screen-xl px-4 py-6 mx-auto lg:px-6 sm:py-16 lg:py-4">
         <div className="overflow-x-auto mt-6">
-          <table className="min-w-full table-auto border-collapse border border-gray-300">
+          <table className="min-w-full table-auto border-collapse border border-slate-200">
             <thead>
-              <tr className="bg-gray-100">
+              <tr className="bg-slate-50 border-b border-slate-300">
                 {[
                   { key: "sr_no", label: "Sr. No." },
                   { key: "date", label: "Date" },
@@ -990,13 +1169,7 @@ const AvailabilityTable = ({
                 ].map((col) => (
                   <th
                     key={col.key}
-                    className={`border border-gray-300 px-4 py-2 text-gray-700 cursor-pointer select-none ${
-                      sortConfig.key === col.key
-                        ? sortConfig.direction === "ascending"
-                          ? "bg-gray-200"
-                          : "bg-gray-300"
-                        : "hover:bg-gray-100"
-                    }`}
+                    className="p-4 text-sm font-normal leading-none text-slate-500 border-b border-slate-300"
                     onClick={() => handleSort(col.key)}
                   >
                     {col.label}
@@ -1013,10 +1186,7 @@ const AvailabilityTable = ({
                     )}
                   </th>
                 ))}
-                <th
-                  className="border border-gray-300 px-4 py-2 text-gray-700"
-                  colSpan="2"
-                >
+                <th className="p-4 text-sm font-normal leading-none text-slate-500 border-b border-slate-300">
                   Actions
                 </th>
               </tr>
@@ -1024,32 +1194,32 @@ const AvailabilityTable = ({
             <tbody>
               {currentSlots.length > 0 ? (
                 currentSlots.map((slot, index) => (
-                  <tr key={slot.id} className="hover:bg-gray-50">
-                    <td className="border border-gray-300 px-4 py-2 text-gray-700">
+                  <tr key={slot.id} className="hover:bg-slate-50">
+                    <td className="p-4 border-b border-slate-200">
                       {index + 1}
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-gray-700">
+                    <td className="p-4 border-b border-slate-200">
                       {slot.date}
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-gray-700">
+                    <td className="p-4 border-b border-slate-200">
                       {slot.day}
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-gray-700">
+                    <td className="p-4 border-b border-slate-200">
                       {slot.time}
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-gray-700">
+                    <td className="p-4 border-b border-slate-200">
                       {slot.mode}
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-gray-700">
+                    <td className="p-4 border-b border-slate-200">
                       {slot.duration} mins
                     </td>
-                    <td className="border border-gray-300 px-4 py-2">
+                    <td className="p-4 border-b border-slate-200">
                       <span
                         className={`py-1 px-2 rounded text-white text-sm ${
                           slot.status === "Available"
                             ? "bg-[#347928]"
                             : "bg-gray-500"
-                        } hover:text-[#001F3F]`}
+                        }`}
                         onClick={() => {
                           setCurrentSlot(slot);
                           setShowStatusModal(true);
@@ -1058,7 +1228,7 @@ const AvailabilityTable = ({
                         {slot.status}
                       </span>
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-gray-700">
+                    <td className="p-4 border-b border-slate-200">
                       <button
                         onClick={() => handleEditSlot(slot)}
                         className="bg-[#FFBD73] hover:bg-yellow-600 text-[#001F3F] font-medium py-1 px-3 rounded mr-2 flex items-center"
@@ -1067,7 +1237,7 @@ const AvailabilityTable = ({
                         <CiEdit />
                       </button>
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-gray-700">
+                    <td className="p-4 border-b border-slate-200">
                       <button
                         onClick={() => handleDeleteSlot(slot.id)}
                         className="bg-[#AE445A] hover:bg-[#FF4545] text-[#001F3F] font-medium py-1 px-3 rounded flex items-center"

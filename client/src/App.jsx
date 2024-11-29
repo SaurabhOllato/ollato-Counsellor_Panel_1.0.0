@@ -15,6 +15,11 @@ import ErrorPage from "./error-page.jsx";
 import RegistrationDetails from "./pages/RegistrationDetails.jsx";
 import SupportForm from "./components/SupportForm.jsx";
 import AvailabilityManagements from "./pages/AvailabilityManagements.jsx";
+import SessionManagement from "./pages/SessionManagement.jsx";
+import MyActivity from "./pages/MyActivity.jsx";
+import RevenueDetails from "./pages/RevenueDetails.jsx";
+import Settings from "./pages/Settings.jsx";
+import ProfileEdit from "./pages/ProfileEdit.jsx";
 function App() {
   // console.log(import.meta.env.VITE_PERSONAL_DELAILS_API);
 
@@ -86,6 +91,61 @@ function App() {
                 <PrivateRoute>
                   <Layout>
                     <AvailabilityManagements />
+                  </Layout>
+                </PrivateRoute>
+              }
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/session-management"
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <SessionManagement />
+                  </Layout>
+                </PrivateRoute>
+              }
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/my-activity"
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <MyActivity />
+                  </Layout>
+                </PrivateRoute>
+              }
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/revenue-details"
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <RevenueDetails />
+                  </Layout>
+                </PrivateRoute>
+              }
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/settings"
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <Settings />
+                  </Layout>
+                </PrivateRoute>
+              }
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <ProfileEdit />
                   </Layout>
                 </PrivateRoute>
               }

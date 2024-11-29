@@ -9,8 +9,8 @@ export default function Dashboard() {
   const { triggerNotification } = useNotification();
   const navigate = useNavigate();
 
-  console.log("Profile Complete:", profileComplete);
-  console.log("Profile Status:", profileStatus);
+  // console.log("Profile Complete:", profileComplete);
+  // console.log("Profile Status:", profileStatus);
 
   //testing
   approveProfile();
