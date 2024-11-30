@@ -361,8 +361,6 @@ function AvailabilityManagements() {
     setSortConfig({ key, direction });
   };
 
-  
-  
   const addSlot = (newSlot) => {
     setAvailability((prev) => [...prev, newSlot]);
     triggerNotification("Slot added successfully!", "success");
@@ -665,6 +663,7 @@ function AvailabilityManagements() {
                   >
                     <option value="video">Video</option>
                     <option value="call">Call</option>
+                    <option value="in_person">In-person</option>
                   </select>
                 </label>
               </div>
@@ -876,6 +875,7 @@ function AvailabilityForm({
             >
               <option value="video">Video</option>
               <option value="call">Call</option>
+              <option value="in_person">In-person</option>
             </select>
           </div>
 

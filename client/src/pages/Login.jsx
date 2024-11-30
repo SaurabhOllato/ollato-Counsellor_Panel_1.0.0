@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import LOGO from "../assets/ollatoLogo.png";
+import LOGO from "../assets/Ollato_Logo_CC-03.png";
 import { useNavigate } from "react-router-dom";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -160,20 +160,20 @@ function Login() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 h-full">
-      <div className="w-full md:w-1/3 bg-[#2C394B] flex items-center justify-center p-8">
-        <img src={LOGO} alt="Logo" className="w-1/2 md:w-3/4 h-auto" />
+      <div className="w-2/4 md:w-2/4 bg-[#63474d] flex items-center justify-center p-8">
+        <img src={LOGO} alt="Logo" className="w-1/2 md:w-3/4 h-auto " />
       </div>
 
-      <div className="w-full md:w-2/3 p-8 mt-20 h-full">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-auto">
-          <h1 className="text-2xl text-[#2C394B] font-semibold mb-6 text-center">
+      <div className=" w-2/4 md:w-2/4 p-8 mt-20 h-full">
+        <div className="bg-[#875f65] p-8 rounded-lg shadow-lg w-full max-w-md mx-auto">
+          <h1 className="text-2xl text-[#ffffff] font-semibold mb-6 text-center">
             {showOtpLogin ? "Login with OTP" : "Welcome Back"}
           </h1>
           <form onSubmit={handleSubmit}>
             {showOtpLogin ? (
               <>
                 <div className="mb-4">
-                  <label className="block text-gray-600">Phone Number *</label>
+                  <label className="block text-[#ffffff]">Phone Number *</label>
                   <input
                     type="text"
                     name="phoneNumber"
@@ -185,7 +185,7 @@ function Login() {
                 </div>
                 {otpSent && (
                   <div className="mb-4">
-                    <label className="block text-gray-600">Enter OTP *</label>
+                    <label className="block text-[#ffffff]">Enter OTP *</label>
                     <input
                       type="text"
                       name="otp"
@@ -217,7 +217,7 @@ function Login() {
             ) : (
               <>
                 <div className="mb-4">
-                  <label className="block text-gray-600">Email *</label>
+                  <label className="block text-[#ffffff]">Email *</label>
                   <input
                     type="email"
                     name="email"
@@ -228,7 +228,7 @@ function Login() {
                   />
                 </div>
                 <div className="mb-4 relative">
-                  <label className="block text-gray-600">Password *</label>
+                  <label className="block text-[#ffffff]">Password *</label>
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
@@ -273,7 +273,7 @@ function Login() {
           </form>
           <div className="mt-6 text-center">
             <button
-              className="text-[#2C394B] underline hover:translate-x-1 transition duration-200 ease-in-out hover:text-[#2d3f5a]"
+              className="text-[#ffffff] underline hover:translate-x-1 transition duration-200 ease-in-out hover:text-[#2d3f5a]"
               onClick={toggleLoginMethod}
             >
               {showOtpLogin ? "Back to Email Login" : "Login with OTP"}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import LOGO from "../assets/ollatoLogo.png";
+import LOGO from "../assets/Ollato_Logo_CC-03.png";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FaArrowRightFromBracket } from "react-icons/fa6";

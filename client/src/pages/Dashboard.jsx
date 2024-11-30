@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import LOGO from "../assets/ollatoLogo.png";
+import LOGO from "../assets/Ollato_Logo_CC-03.png";
 import { useAuth } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";

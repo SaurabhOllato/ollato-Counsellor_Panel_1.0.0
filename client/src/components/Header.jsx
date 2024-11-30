@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import LOGO from "../assets/ollatoLogo.png";
+import LOGO from "../assets/Ollato_Logo_CC-03.png";
 import { FaUserCog } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/UserContext";

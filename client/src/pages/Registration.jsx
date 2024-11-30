@@ -7,7 +7,7 @@ import InputField from "../components/InputField";
 import statesAndDistricts from "../../public/states-and-districts.json";
 import { useAuth } from "../context/UserContext";
 import { useNotification } from "../context/NotificationContext";
-import LOGO from "../assets/ollatoLogo.png";
+import LOGO from "../assets/Ollato_Logo_CC-03.png";
 
 const Registration = () => {
   // State Variables

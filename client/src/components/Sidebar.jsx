@@ -10,7 +10,7 @@ import { FaBuildingUser } from "react-icons/fa6";
 import { FaUserCog } from "react-icons/fa";
 import { CgLogOut } from "react-icons/cg";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import LOGO from "../assets/ollatoLogo.png";
+import LOGO from "../assets/Ollato_Logo_CC-03.png";
 
 import {
   Card,
