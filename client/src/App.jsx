@@ -18,8 +18,8 @@ import AvailabilityManagements from "./pages/AvailabilityManagements.jsx";
 import SessionManagement from "./pages/SessionManagement.jsx";
 import MyActivity from "./pages/MyActivity.jsx";
 import RevenueDetails from "./pages/RevenueDetails.jsx";
-import Settings from "./pages/Settings.jsx";
 import ProfileEdit from "./pages/ProfileEdit.jsx";
+import AccountSettings from "./pages/AccountSettings.jsx";
 function App() {
   // console.log(import.meta.env.VITE_PERSONAL_DELAILS_API);
 
@@ -130,11 +130,11 @@ function App() {
               errorElement={<ErrorPage />}
             />
             <Route
-              path="/settings"
+              path="/account-settings"
               element={
                 <PrivateRoute>
                   <Layout>
-                    <Settings />
+                    <AccountSettings />
                   </Layout>
                 </PrivateRoute>
               }

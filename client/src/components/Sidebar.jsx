@@ -5,12 +5,12 @@ import { useNotification } from "../context/NotificationContext";
 import { RiHome8Line } from "react-icons/ri";
 import { MdAssessment } from "react-icons/md";
 import { LuPackageSearch } from "react-icons/lu";
-import { TbReportAnalytics, TbReportMoney } from "react-icons/tb";
+import { TbReportMoney } from "react-icons/tb";
 import { FaBuildingUser } from "react-icons/fa6";
 import { FaUserCog } from "react-icons/fa";
 import { CgLogOut } from "react-icons/cg";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import LOGO from "../assets/Ollato_Logo_CC-03.png";
+import { BiSupport } from "react-icons/bi";
 
 import {
   Card,
@@ -43,7 +43,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       icon: <TbReportMoney />,
       path: "/revenue-details",
     },
-    { label: "Settings", icon: <FaUserCog />, path: "/settings" },
+    {
+      label: "Account Settings",
+      icon: <FaUserCog />,
+      path: "/account-settings",
+    },
+    {
+      label: "Help & Support",
+      icon: <BiSupport />,
+      path: "/support",
+    },
   ];
 
   const handleLogout = () => {
