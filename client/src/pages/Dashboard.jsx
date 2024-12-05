@@ -117,42 +117,124 @@ export default function Dashboard() {
   // Main Dashboard Content
   if (profileComplete) {
     return (
+      // <div className="flex-1 px-8 h-full">
+      //   <div className="p-6 rounded-lg w-full shadow-2xl h-auto mb-6 mt-20 sm:p-4 sm:mr-4 sm:mt-12 md:p-6 lg:h-2/3">
+      //     <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+      //       Welcome {user?.first_name}
+      //     </h2>
+      //     <hr className="border-gray-300 mb-4" />
+
+      //     {/* Flex Container for Left and Right */}
+      //     <div className="flex lg:flex-row items-center lg:items-start justify-between mb-6 flex-wrap gap-4 bg-white rounded shadow-lg p-4">
+      //       <div className="w-full flex justify-center sm:justify-start sm:w-auto">
+      //         <img
+      //           className="object-cover w-20 h-20 mt-3 mr-3 rounded-full"
+      //           src={
+      //             user?.profileImage ||
+      //             "https://lh3.googleusercontent.com/a/AEdFTp70cvwI5eevfcr4LonOEX5gB2rzx7JnudOcnYbS1qU=s96-c"
+      //           }
+      //           alt="Profile"
+      //         />
+      //       </div>
+      //       {/* Counselor Information */}
+      //       <div className="flex-1 p-4 border border-gray-200 rounded shadow-sm w-full sm:w-auto flex flex-col sm:items-start">
+      //         <h3 className="font-semibold text-gray-700 mb-2 text-2xl">
+      //           Counselor Information
+      //         </h3>
+      //         <div className="mb-4 md:text-lg text-gray-400 sm:items-start">
+      //           <p>Name: {user?.first_name}</p>
+      //           <p>Age: 26 Years</p>
+      //           <p>Mobile No.: {user?.phone_number}</p>
+      //         </div>
+      //       </div>
+
+      //       <div className="flex-1 p-4 border border-gray-200 rounded shadow-sm">
+      //         <h3 className="font-semibold text-gray-700 mb-2 text-2xl">
+      //           Education Information
+      //         </h3>
+      //         <div className="mb-4 md:text-lg text-gray-400">
+      //           <p>Qualification: Computer Engineering</p>
+      //           <p>Experience: 2 years 5 months</p>
+      //           <p>Subject Expertise: CSS</p>
+      //         </div>
+      //       </div>
+      //     </div>
+      //   </div>
+
+      //   <div className="p-6 rounded-lg w-full shadow-2xl h-auto mb-6 mt-20 sm:p-4 bg-white sm:mr-4 sm:mt-12 md:p-6 lg:h-2/3">
+      //     {/* Header */}
+      //     <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+      //       Overall Session Details
+      //     </h2>
+      //     <hr className="border-gray-300 mb-4" />
+
+      //     {/* Sessions Grid */}
+      //     <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:flex-row items-center lg:items-start justify-between mb-6 flex-wrap gap-4 bg-white rounded shadow-lg p-4">
+      //       {sessionData.map((session, index) => (
+      //         <div
+      //           key={index}
+      //           className={`flex justify-between items-center p-4 border-2 cursor-pointer max-w-sm bg-white rounded-lg shadow hover:bg-gray-100 ${
+      //             session.color === "green" ? "border-green-500" : ""
+      //           } ${session.color === "blue" ? "border-blue-500" : ""} ${
+      //             session.color === "yellow" ? "border-yellow-500" : ""
+      //           } ${session.color === "orange" ? "border-orange-500" : ""} ${
+      //             session.color === "red" ? "border-red-500" : ""
+      //           }`}
+      //         >
+      //           <div>
+      //             <h3 className={`text-${session.color}-700 font-semibold`}>
+      //               {session.status}
+      //             </h3>
+      //             <p className="text-2xl">{session.count}</p>
+      //           </div>
+      //           <img
+      //             src={session.icon}
+      //             alt={`${session.status} icon`}
+      //             className="h-12 w-12"
+      //           />
+      //         </div>
+      //       ))}
+      //     </div>
+      //   </div>
+      // </div>
       <div className="flex-1 px-8 h-full">
-        <div className="p-6 rounded-lg w-full shadow-2xl h-auto mb-6 mt-20 sm:p-4 sm:mr-4 sm:mt-12 md:p-6 lg:h-2/3">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-            Welcome {user?.first_name}
+        <div className="p-2 rounded-lg w-full shadow-lg h-auto mb-6 mt-2 bg-white">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
+            Welcome{" "}
+            {user?.first_name.charAt(0).toUpperCase() +
+              user?.first_name.slice(1)}
           </h2>
           <hr className="border-gray-300 mb-4" />
 
           {/* Flex Container for Left and Right */}
-          <div className="flex lg:flex-row items-center lg:items-start justify-between mb-6 flex-wrap gap-4 bg-white rounded shadow-lg p-4">
+          <div className="flex lg:flex-row items-center lg:items-start justify-between mb-6 flex-wrap gap-6 bg-gray-50 rounded-lg shadow-md p-4">
             <div className="w-full flex justify-center sm:justify-start sm:w-auto">
               <img
-                className="object-cover w-20 h-20 mt-3 mr-3 rounded-full"
+                className="object-cover w-24 h-24 mt-3 mr-3 rounded-full border-2 border-blue-400 shadow-md"
                 src={
                   user?.profileImage ||
-                  "https://lh3.googleusercontent.com/a/AEdFTp70cvwI5eevfcr4LonOEX5gB2rzx7JnudOcnYbS1qU=s96-c"
+                  "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
                 }
                 alt="Profile"
               />
             </div>
             {/* Counselor Information */}
-            <div className="flex-1 p-4 border border-gray-200 rounded shadow-sm w-full sm:w-auto flex flex-col sm:items-start">
-              <h3 className="font-semibold text-gray-700 mb-2 text-2xl">
+            <div className="flex-1 p-4 border border-gray-300 rounded-lg shadow-sm w-full sm:w-auto flex flex-col sm:items-start bg-white">
+              <h3 className="font-semibold text-gray-800 mb-2 text-xl">
                 Counselor Information
               </h3>
-              <div className="mb-4 md:text-lg text-gray-400 sm:items-start">
+              <div className="mb-4 text-gray-600">
                 <p>Name: {user?.first_name}</p>
                 <p>Age: 26 Years</p>
                 <p>Mobile No.: {user?.phone_number}</p>
               </div>
             </div>
 
-            <div className="flex-1 p-4 border border-gray-200 rounded shadow-sm">
-              <h3 className="font-semibold text-gray-700 mb-2 text-2xl">
+            <div className="flex-1 p-4 border border-gray-300 rounded-lg shadow-sm bg-white">
+              <h3 className="font-semibold text-gray-800 mb-2 text-xl">
                 Education Information
               </h3>
-              <div className="mb-4 md:text-lg text-gray-400">
+              <div className="mb-4 text-gray-600">
                 <p>Qualification: Computer Engineering</p>
                 <p>Experience: 2 years 5 months</p>
                 <p>Subject Expertise: CSS</p>
@@ -161,19 +243,19 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="p-6 rounded-lg w-full shadow-2xl h-auto mb-6 mt-20 sm:p-4 bg-white sm:mr-4 sm:mt-12 md:p-6 lg:h-2/3">
+        <div className="p-6 rounded-lg w-full shadow-lg h-auto mb-6 bg-white mt-10">
           {/* Header */}
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
             Overall Session Details
           </h2>
           <hr className="border-gray-300 mb-4" />
 
           {/* Sessions Grid */}
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:flex-row items-center lg:items-start justify-between mb-6 flex-wrap gap-4 bg-white rounded shadow-lg p-4">
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {sessionData.map((session, index) => (
               <div
                 key={index}
-                className={`flex justify-between items-center p-4 border-2 cursor-pointer max-w-sm bg-white rounded-lg shadow hover:bg-gray-100 ${
+                className={`flex justify-between items-center p-4 border-2 cursor-pointer max-w-sm bg-white rounded-lg shadow hover:shadow-lg transform hover:scale-105 transition duration-200 ${
                   session.color === "green" ? "border-green-500" : ""
                 } ${session.color === "blue" ? "border-blue-500" : ""} ${
                   session.color === "yellow" ? "border-yellow-500" : ""
@@ -185,7 +267,7 @@ export default function Dashboard() {
                   <h3 className={`text-${session.color}-700 font-semibold`}>
                     {session.status}
                   </h3>
-                  <p className="text-2xl">{session.count}</p>
+                  <p className="text-2xl font-bold">{session.count}</p>
                 </div>
                 <img
                   src={session.icon}

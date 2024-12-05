@@ -171,11 +171,10 @@ const Registration = () => {
 
   const handlePersonalDetailsSubmit = async (e) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user"));
-    const user_id = user?.user_id || "user123";
+    // const user = JSON.parse(localStorage.getItem("user"));
+    // const user_id = user?.user_id || "user123";
 
     const payload = {
-      user_id: user_id,
       ...formData,
     };
     // console.log("Payload:", payload);

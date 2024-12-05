@@ -216,7 +216,6 @@ const addProfessionalDetails = async (req, res) => {
 
 const addPersonalDetails = async (req, res) => {
   const {
-    user_id,
     first_name,
     last_name,
     email,
@@ -232,7 +231,6 @@ const addPersonalDetails = async (req, res) => {
 
   // Check for missing required fields
   if (
-    !user_id ||
     !first_name ||
     !last_name ||
     !email ||
@@ -259,11 +257,10 @@ const addPersonalDetails = async (req, res) => {
     // Insert data into the database
     const query = `
             INSERT INTO personal_details (
-                user_id, first_name, last_name, email, phone_number, gender, date_of_birth, state, district, password
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 first_name, last_name, email, phone_number, gender, date_of_birth, state, district, password
+            ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
     const values = [
-      user_id,
       first_name,
       last_name,
       email,
@@ -282,7 +279,6 @@ const addPersonalDetails = async (req, res) => {
       message: "Personal details added successfully",
       data: {
         id: result.insertId,
-        user_id,
         first_name,
         last_name,
         email,

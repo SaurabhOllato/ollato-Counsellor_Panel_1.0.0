@@ -100,7 +100,10 @@ function Header() {
               ref={userIconRef}
               className="flex items-center gap-2 text-lg"
             >
-              <span>{user?.first_name}</span>
+              <span>
+                {user?.first_name.charAt(0).toUpperCase() +
+                  user?.first_name.slice(1)}
+              </span>
               {user?.profileImage ? (
                 <img
                   src={user.profileImage}
