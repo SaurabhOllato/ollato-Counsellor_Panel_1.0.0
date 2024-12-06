@@ -20,6 +20,7 @@ import MyActivity from "./pages/MyActivity.jsx";
 import RevenueDetails from "./pages/RevenueDetails.jsx";
 import ProfileEdit from "./pages/ProfileEdit.jsx";
 import AccountSettings from "./pages/AccountSettings.jsx";
+import ResetPassword from "./components/ResetPassword.jsx";
 function App() {
   // console.log(import.meta.env.VITE_PERSONAL_DELAILS_API);
 
@@ -48,6 +49,11 @@ function App() {
             <Route
               path="/forgot-password"
               element={<ForgotPassword />}
+              ErrorBoundary={ErrorBoundary}
+            />
+            <Route
+              path="/reset-password"
+              element={<ResetPassword />}
               ErrorBoundary={ErrorBoundary}
             />
 

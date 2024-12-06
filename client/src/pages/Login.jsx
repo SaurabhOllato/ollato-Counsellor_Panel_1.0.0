@@ -20,9 +20,7 @@ function Login() {
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const login_Url = import.meta.env.VITE_LOGIN_API;
-  const send_mobile_otp_Url = import.meta.env.VITE_SEND_MOBILE_OTP_API;
-  const verify_mobile_otp_Url = import.meta.env.VITE_VERIFY_MOBILE_OTP_API;
+  const apiEndpointURL = import.meta.env.VITE_APP_API_ENDPOINT_URL;
 
   const { login } = useAuth(); // Access context login function
   const { triggerNotification } = useNotification();
@@ -41,7 +39,7 @@ function Login() {
 
     setLoading(true);
     try {
-      const response = await fetch(login_Url, {
+      const response = await fetch(`${apiEndpointURL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -56,7 +54,6 @@ function Login() {
 
         // Validate if expected response data exists
         if (data.user) {
-          // localStorage.setItem("token", data.token); // Store token in localStorage
           login(data.user); // Save user in context
           triggerNotification("Login successful! Redirecting...", "success");
           navigate("/dashboard");
@@ -90,7 +87,7 @@ function Login() {
         return;
       }
 
-      const response = await fetch(send_mobile_otp_Url, {
+      const response = await fetch(`${apiEndpointURL}/otp/mobile-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phoneNumber: formData.phoneNumber }),
@@ -120,12 +117,12 @@ function Login() {
   const handleVerifyOtp = async () => {
     setLoading(true);
     try {
-      const response = await fetch(verify_mobile_otp_Url, {
+      const response = await fetch(`${apiEndpointURL}/otp/verify-mobile-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           phoneNumber: formData.phoneNumber,
-          otp: formData.otp,
+          enteredOtp: formData.otp,
         }),
       });
 
@@ -159,21 +156,21 @@ function Login() {
   const handleForgotPassword = () => navigate("/forgot-password");
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 h-full">
-      <div className="w-2/4 md:w-2/4 bg-[#63474d] flex items-center justify-center p-8">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#FFEADB] h-full">
+      <div className="w-2/4 md:w-2/4 bg-[#406882] flex items-center justify-center p-14">
         <img src={LOGO} alt="Logo" className="w-1/2 md:w-3/4 h-auto " />
       </div>
 
-      <div className=" w-2/4 md:w-2/4 p-8 mt-20 h-full">
-        <div className="bg-[#875f65] p-8 rounded-lg shadow-lg w-full max-w-md mx-auto">
-          <h1 className="text-2xl text-[#ffffff] font-semibold mb-6 text-center">
+      <div className=" w-2/4 md:w-2/4 p-8 mt-20 h-full ">
+        <div className="bg-[#FFEADB] p-8 border border-[#ff9a3c] rounded-lg shadow-lg w-full max-w-md mx-auto ">
+          <h1 className="text-2xl text-[#ff9a3c] font-semibold mb-6 text-center">
             {showOtpLogin ? "Login with OTP" : "Welcome Back"}
           </h1>
           <form onSubmit={handleSubmit}>
             {showOtpLogin ? (
               <>
                 <div className="mb-4">
-                  <label className="block text-[#ffffff]">Phone Number *</label>
+                  <label className="block text-[#ff9a3c]">Phone Number *</label>
                   <input
                     type="text"
                     name="phoneNumber"
@@ -185,7 +182,7 @@ function Login() {
                 </div>
                 {otpSent && (
                   <div className="mb-4">
-                    <label className="block text-[#ffffff]">Enter OTP *</label>
+                    <label className="block text-[#ff9a3c]">Enter OTP *</label>
                     <input
                       type="text"
                       name="otp"
@@ -201,7 +198,7 @@ function Login() {
                   <button
                     type="button"
                     onClick={otpSent ? handleVerifyOtp : handleSendOtp}
-                    className={`w-1/2 bg-[#2C394B] text-white p-2 rounded-md ${
+                    className={`w-1/2 bg-[#406882] text-[#ffffff] p-2 rounded-md ${
                       loading ? "opacity-50" : ""
                     }`}
                     disabled={loading || (!otpSent && !formData.phoneNumber)}
@@ -217,7 +214,7 @@ function Login() {
             ) : (
               <>
                 <div className="mb-4">
-                  <label className="block text-[#ffffff]">Email *</label>
+                  <label className="block text-[#ff9a3c]">Email *</label>
                   <input
                     type="email"
                     name="email"
@@ -228,7 +225,7 @@ function Login() {
                   />
                 </div>
                 <div className="mb-4 relative">
-                  <label className="block text-[#ffffff]">Password *</label>
+                  <label className="block text-[#ff9a3c]">Password *</label>
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
@@ -239,7 +236,7 @@ function Login() {
                   />
                   <span
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-9 cursor-pointer text-gray-500"
+                    className="absolute right-3 top-9 cursor-pointer text-[#0e0d0d]"
                   >
                     {showPassword ? (
                       <AiOutlineEyeInvisible />
@@ -252,7 +249,7 @@ function Login() {
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    className="text-[#2C394B] underline hover:translate-x-1 transition duration-200 ease-in-out"
+                    className="text-[#ff9a3c] underline hover:translate-x-1 transition duration-200 ease-in-out"
                   >
                     Forgot Password?
                   </button>
@@ -260,7 +257,7 @@ function Login() {
                 <div className="mt-4 flex justify-center">
                   <button
                     type="submit"
-                    className={`w-1/4 bg-[#2C394B] text-white p-2 rounded-md ${
+                    className={`w-1/4 bg-[#406882] text-[#ffffff] p-2 rounded-md hover:translate-x-1 transition duration-200 ease-in-out ${
                       loading ? "opacity-50" : ""
                     }`}
                     disabled={loading}
@@ -273,16 +270,16 @@ function Login() {
           </form>
           <div className="mt-6 text-center">
             <button
-              className="text-[#ffffff] underline hover:translate-x-1 transition duration-200 ease-in-out hover:text-[#2d3f5a]"
+              className="text-[#ff9a3c] underline hover:translate-x-1 transition duration-200 ease-in-out hover:text-[#c48042]"
               onClick={toggleLoginMethod}
             >
               {showOtpLogin ? "Back to Email Login" : "Login with OTP"}
             </button>
           </div>
           <div className="mt-4 text-center flex justify-center sm:text-sm md:text-base">
-            <p className="text-gray-600">Don't have an account?</p>
+            <p className="text-[#ff9a3c]">Don't have an account?</p>
             <button
-              className="ml-2 text-md text-[#2C394B] hover:text-[#597aac] hover:translate-x-1 transition duration-200 ease-in-out flex items-center gap-1"
+              className="ml-2 text-md text-[#ff9a3c] hover:text-[#c48042] hover:translate-x-1 transition duration-200 ease-in-out flex items-center gap-1"
               onClick={() => navigate("/registration")}
             >
               <FaArrowRightFromBracket />

@@ -10,11 +10,14 @@ const OTP_EXPIRATION_TIME = 1 * 60 * 1000; // OTP expires after 5 minutes
 // Generate and send OTP
 exports.sendOtp = async (req, res) => {
   let { phoneNumber } = req.body;
-  console.log("Phone Number",phoneNumber);
+  console.log("Phone Number", phoneNumber);
 
   if (!phoneNumber) {
     return res.status(400).json({ message: "Phone number is required." });
   }
+
+  // Normalize phone number
+  const normalizedPhoneNumber = phoneNumber.replace(/\D/g, "");
 
   // Generate a 4-digit OTP
   const otp = Math.floor(1000 + Math.random() * 9000);
@@ -24,7 +27,11 @@ exports.sendOtp = async (req, res) => {
     otp,
     expiresAt: moment().add(5, "minutes").toISOString(), // OTP expires in 5 minutes
   };
-  otpStore[phoneNumber] = otpData;
+  // otpStore[phoneNumber] = otpData;
+  otpStore[normalizedPhoneNumber] = otpData;
+  // Log stored OTP
+  console.log("Stored OTP for phoneNumber:", normalizedPhoneNumber, otpData);
+  console.log("All OTPs in otpStore:", otpStore);
 
   // Send OTP using MSG91 API
   try {
@@ -62,14 +69,22 @@ exports.sendOtp = async (req, res) => {
 exports.verifyOtp = (req, res) => {
   const { phoneNumber, enteredOtp } = req.body;
 
-  console.log("Received phoneNumber:", phoneNumber);
-  console.log("Received enteredOtp:", enteredOtp);
+  // console.log("Received phoneNumber:", phoneNumber);
+  // console.log("Received enteredOtp:", enteredOtp);
+  console.log("Frontend Sent Data:", {
+    phoneNumber: phoneNumber,
+    enteredOtp: enteredOtp,
+  });
 
   if (!phoneNumber || !enteredOtp) {
     return res
       .status(400)
       .json({ message: "Phone number and OTP are required." });
   }
+
+  console.log("All OTPs in Store:", otpStore);
+  console.log("Looking for OTP for phoneNumber:", phoneNumber);
+  console.log("Matching key exists:", otpStore.hasOwnProperty(phoneNumber));
 
   // Check if OTP exists for the phone number
   const otpData = otpStore[phoneNumber];

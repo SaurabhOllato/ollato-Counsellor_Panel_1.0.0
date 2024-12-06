@@ -241,20 +241,22 @@ const Registration = () => {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-100">
       {/* Sidebar */}
-      <div className="w-full md:w-1/3 bg-[#2C394B] flex items-center justify-center p-8">
+      <div className="w-full md:w-2/4 bg-[#406882] flex items-center justify-center p-8">
         <img src={LOGO} alt="Logo" className="w-1/2 h-auto" />
       </div>
+
       {/* Form Section */}
-      <div className="w-full h-full md:w-2/3 p-6 md:p-8 flex flex-col">
+      <div className="w-full h-full md:w-2/4 p-6 md:p-4 flex flex-col bg-[#FFEADB]">
         {/* Header */}
-        <div className="bg-white p-8 rounded-lg shadow-lg mx-auto w-full">
-          <h1 className="text-2xl text-[#2C394B] font-semibold mb-6 text-center">
+        <div className="bg-[#FFEADB] p-8 rounded-lg shadow-lg mx-auto w-full">
+          <h1 className="text-2xl text-[#ff9a3c] font-semibold mb-4 text-center">
             Welcome to Registration
           </h1>
 
-          {/* Form */}
+          {/* Registration Form */}
           <form onSubmit={handlePersonalDetailsSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+              {/* Input Fields */}
               <InputField
                 label="First Name"
                 name="first_name"
@@ -269,45 +271,50 @@ const Registration = () => {
                 value={formData.last_name}
                 handleChange={handleChange}
               />
-              <InputField
-                label="Email"
-                name="email"
-                placeholder="Enter your email"
-                type="email"
-                value={formData.email}
-                handleChange={handleChange}
-                disabled={isEmailVerified}
-              />
-              <InputField
-                label="Phone Number"
-                name="phone_number"
-                placeholder="Enter your phone number"
-                type="text"
-                value={formData.phone_number}
-                handleChange={handleChange}
-                disabled={isPhoneVerified}
-              />
-              {/* Email Verification */}
               <div>
-                <button
-                  type="button"
-                  onClick={handleVerifyEmail}
-                  disabled={isEmailVerified || isVerifying}
-                  className="text-[#2C394B] bg-[#f1f5f9] border border-[#2C394B] hover:bg-[#2C394B] hover:text-[#f1f5f9] p-2 rounded"
-                >
-                  {isEmailVerified ? "Email Verified" : "Verify Email"}
-                </button>
+                <InputField
+                  label="Email"
+                  name="email"
+                  placeholder="Enter your email"
+                  type="email"
+                  value={formData.email}
+                  handleChange={handleChange}
+                  disabled={isEmailVerified}
+                />
+                {/* Email Verification Button */}
+                <div className="flex justify-start ">
+                  <button
+                    type="button"
+                    onClick={handleVerifyEmail}
+                    disabled={isEmailVerified || isVerifying}
+                    className="text-[#ff9a3c] bg-[#f1f5f9] border border-[#406882] hover:bg-[#406882] hover:text-[#f1f5f9] py-2 px-4 rounded transition duration-150 "
+                  >
+                    {isEmailVerified ? "Email Verified" : "Verify Email"}
+                  </button>
+                </div>
               </div>
-              {/* Phone Verification */}
+
               <div>
-                <button
-                  type="button"
-                  onClick={handleVerifyPhone}
-                  disabled={isPhoneVerified || isVerifying}
-                  className="text-[#2C394B] bg-[#f1f5f9] border border-[#2C394B] hover:bg-[#2C394B] hover:text-[#f1f5f9] p-2 rounded"
-                >
-                  Verify Phone
-                </button>
+                <InputField
+                  label="Phone Number"
+                  name="phone_number"
+                  placeholder="Enter your phone number"
+                  type="text"
+                  value={formData.phone_number}
+                  handleChange={handleChange}
+                  disabled={isPhoneVerified}
+                />
+                {/* Phone Verification Button */}
+                <div className="flex justify-start">
+                  <button
+                    type="button"
+                    onClick={handleVerifyPhone}
+                    disabled={isPhoneVerified || isVerifying}
+                    className="text-[#ff9a3c] bg-[#f1f5f9] border border-[#406882] hover:bg-[#406882] hover:text-[#f1f5f9] py-2 px-4 rounded transition duration-150"
+                  >
+                    Verify Phone
+                  </button>
+                </div>
               </div>
               {/* OTP Modal */}
               {otpModal && (
@@ -320,6 +327,7 @@ const Registration = () => {
                 />
               )}
 
+              {/* Gender Selection */}
               <InputField
                 label="Gender"
                 name="gender"
@@ -334,6 +342,8 @@ const Registration = () => {
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
               </InputField>
+
+              {/* Date of Birth */}
               <InputField
                 label="Date of Birth"
                 name="date_of_birth"
@@ -341,6 +351,8 @@ const Registration = () => {
                 handleChange={handleChange}
                 type="date"
               />
+
+              {/* State Selection */}
               <InputField
                 label="State"
                 name="state"
@@ -357,8 +369,10 @@ const Registration = () => {
                   </option>
                 ))}
               </InputField>
+
+              {/* District Selection */}
               <InputField
-                label="district"
+                label="District"
                 name="district"
                 value={formData.district}
                 handleChange={(e) =>
@@ -367,7 +381,7 @@ const Registration = () => {
                 component="select"
               >
                 <option value="" disabled>
-                  Select district
+                  Select District
                 </option>
                 {districts.map((district) => (
                   <option key={district} value={district}>
@@ -375,6 +389,8 @@ const Registration = () => {
                   </option>
                 ))}
               </InputField>
+
+              {/* Password Input */}
               <div className="relative">
                 <InputField
                   label="Password"
@@ -391,6 +407,8 @@ const Registration = () => {
                   {showPassword ? <FiEyeOff /> : <FiEye />}
                 </span>
               </div>
+
+              {/* Confirm Password Input */}
               <div className="relative">
                 <InputField
                   label="Confirm Password"
@@ -408,24 +426,25 @@ const Registration = () => {
                 </span>
               </div>
             </div>
-            <div>
-              <div className="col-span-2 flex justify-center mt-6">
-                <button
-                  type="submit"
-                  className="bg-[#2C394B] text-white py-2 px-6 rounded hover:bg-[#285b45] transition duration-200"
-                >
-                  Register
-                </button>
-              </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-center mt-4">
+              <button
+                type="submit"
+                className="bg-[#406882] text-white py-2 px-6 rounded hover:translate-y-1 transition duration-200"
+              >
+                Register
+              </button>
             </div>
           </form>
         </div>
-        {/* login  */}
-        <div className="absolute top-6 right-14 flex justify-center items-center mt-4">
-          <p className="text-sm text-[#2C394B]">Already have an account?</p>
+
+        {/* Login Link */}
+        <div className="absolute top-2 right-12 flex justify-center items-center mt-4">
+          <p className="text-sm text-[#ff9a3c]">Already have an account?</p>
           <button
             onClick={() => navigate("/")}
-            className="ml-2 text-md text-[#2C394B] hover:text-[#597aac] hover:translate-x-1 transition duration-200 ease-in-out flex items-center gap-1"
+            className="ml-2 text-md text-[#ff9a3c] hover:text-[#597aac] hover:translate-x-1 transition duration-200 ease-in-out flex items-center gap-1"
           >
             <FaArrowRightFromBracket />
             Login

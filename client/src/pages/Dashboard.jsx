@@ -224,7 +224,13 @@ export default function Dashboard() {
                 Counselor Information
               </h3>
               <div className="mb-4 text-gray-600">
-                <p>Name: {user?.first_name}</p>
+                <p>
+                  Name:
+                  {user?.first_name.charAt(0).toUpperCase() +
+                    user?.first_name.slice(1)}{" "}
+                  {user?.last_name.charAt(0).toUpperCase() +
+                    user?.last_name.slice(1)}
+                </p>
                 <p>Age: 26 Years</p>
                 <p>Mobile No.: {user?.phone_number}</p>
               </div>
