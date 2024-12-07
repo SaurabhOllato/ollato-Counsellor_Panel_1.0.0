@@ -3,11 +3,14 @@ import LOGO from "../assets/Ollato_Logo_CC-03.png";
 import { useAuth } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
+import { FaRegUser } from "react-icons/fa";
 
 export default function Dashboard() {
   const { user, profileComplete, profileStatus, approveProfile } = useAuth();
   const { triggerNotification } = useNotification();
   const navigate = useNavigate();
+  const [userDetails, setUserDetails] = useState(null);
+  const [sessions, setSessions] = useState();
 
   // console.log("Profile Complete:", profileComplete);
   // console.log("Profile Status:", profileStatus);
@@ -38,34 +41,34 @@ export default function Dashboard() {
 
   // Dynamically render the session cards
   const sessionData = [
-    { status: "Completed Session", count: 0, color: "green", icon: LOGO },
+    { status: "Completed Session", count: 50, color: "green", icon: LOGO },
     {
       status: "Ongoing Session",
-      count: 0,
+      count: 10,
       color: "blue",
       icon: "https://via.placeholder.com/50",
     },
     {
       status: "Pending Session",
-      count: 0,
+      count: 19,
       color: "yellow",
       icon: "https://via.placeholder.com/50",
     },
     {
       status: "Rescheduled Session",
-      count: 0,
+      count: 15,
       color: "orange",
       icon: "https://via.placeholder.com/50",
     },
     {
       status: "Cancelled Session",
-      count: 0,
+      count: 10,
       color: "red",
       icon: "https://via.placeholder.com/50",
     },
     {
       status: "Accept Session",
-      count: 0,
+      count: 30,
       color: "green",
       icon: "https://via.placeholder.com/50",
     },
@@ -113,6 +116,39 @@ export default function Dashboard() {
       </div>
     );
   }
+  useEffect(() => {
+    async function fetchUserDetails() {
+      try {
+        // const response = await axios.get("/api/users/me");
+        // setUserDetails(response.data);
+        setUserDetails({
+          first_name: "John",
+          last_name: "Doe",
+          email: "jH2dX@example.com",
+          qualification: "Bachelor of Science in Computer Science",
+          experience: "2 years 5 months",
+          specialization: "Web Development",
+          age: 26,
+          phone: "1234567890",
+        });
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    }
+
+    async function fetchSessions() {
+      try {
+        // const response = await axios.get("/api/sessions");
+        // setSessions(response.data);
+        setSessions(sessionData);
+      } catch (error) {
+        console.error("Error fetching sessions:", error);
+      }
+    }
+
+    fetchUserDetails();
+    fetchSessions();
+  }, []);
 
   // Main Dashboard Content
   if (profileComplete) {
@@ -130,7 +166,7 @@ export default function Dashboard() {
       //         <img
       //           className="object-cover w-20 h-20 mt-3 mr-3 rounded-full"
       //           src={
-      //             user?.profileImage ||
+      //             user?.profile_pic ||
       //             "https://lh3.googleusercontent.com/a/AEdFTp70cvwI5eevfcr4LonOEX5gB2rzx7JnudOcnYbS1qU=s96-c"
       //           }
       //           alt="Profile"
@@ -199,10 +235,11 @@ export default function Dashboard() {
       // </div>
       <div className="flex-1 px-8 h-full">
         <div className="p-2 rounded-lg w-full shadow-lg h-auto mb-6 mt-2 bg-white">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">
             Welcome{" "}
             {user?.first_name.charAt(0).toUpperCase() +
-              user?.first_name.slice(1)}
+              user?.first_name.slice(1)}{" "}
+            {user?.last_name.charAt(0).toUpperCase() + user?.last_name.slice(1)}
           </h2>
           <hr className="border-gray-300 mb-4" />
 
@@ -211,10 +248,7 @@ export default function Dashboard() {
             <div className="w-full flex justify-center sm:justify-start sm:w-auto">
               <img
                 className="object-cover w-24 h-24 mt-3 mr-3 rounded-full border-2 border-blue-400 shadow-md"
-                src={
-                  user?.profileImage ||
-                  "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
-                }
+                src={user?.profile_pic || <FaRegUser />}
                 alt="Profile"
               />
             </div>
@@ -231,8 +265,8 @@ export default function Dashboard() {
                   {user?.last_name.charAt(0).toUpperCase() +
                     user?.last_name.slice(1)}
                 </p>
-                <p>Age: 26 Years</p>
-                <p>Mobile No.: {user?.phone_number}</p>
+                <p>Age: {userDetails?.age || "N/A"}</p>
+                <p>Mobile No.: {userDetails?.phone || "N/A"}</p>
               </div>
             </div>
 
@@ -241,9 +275,11 @@ export default function Dashboard() {
                 Education Information
               </h3>
               <div className="mb-4 text-gray-600">
-                <p>Qualification: Computer Engineering</p>
-                <p>Experience: 2 years 5 months</p>
-                <p>Subject Expertise: CSS</p>
+                <p>Qualification: {userDetails?.qualification || "N/A"}</p>
+                <p>Experience: {userDetails?.experience || "N/A"}</p>
+                <p>
+                  Subject Expertise: {userDetails?.subject_expertise || "N/A"}
+                </p>
               </div>
             </div>
           </div>

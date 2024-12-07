@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/UserContext";
 import { useNotification } from "../context/NotificationContext";
 import { RiHome8Line } from "react-icons/ri";
@@ -11,6 +11,7 @@ import { FaUserCog } from "react-icons/fa";
 import { CgLogOut } from "react-icons/cg";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { BiSupport } from "react-icons/bi";
+import LOGO from "../assets/Ollato_Logo_CC-03.png";
 
 import {
   Card,
@@ -65,11 +66,26 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   return (
     <Card
-      className={`h-[calc(100vh-2rem)] ${
+      className={`h-[calc(100vh)] ${
         sidebarOpen ? "w-64" : "w-20"
-      } fixed top-0 left-0 z-40 pt-20 shadow-md transition-all duration-300 bg-[#363434] h-full text-lg`}
+      } fixed top-0 left-0 z-40 shadow-lg transition-all duration-300 bg-[#584976] rounded-none`}
     >
-      {/* <hr className="my-2 border-gray-200" /> */}
+      {/* Sidebar Logo Section */}
+      <div className="bg-[#827397] p-4 flex justify-center ">
+        <Link to="/dashboard" className="flex items-center">
+          <img
+            src={LOGO}
+            alt="Logo"
+            className={`h-16 w-28 transition-transform duration-300 ${
+              sidebarOpen ? "scale-100" : "scale-75"
+            }`}
+          />
+        </Link>
+      </div>
+
+      <hr className="mb-4 border-gray-300 opacity-40" />
+
+      {/* Sidebar Items */}
       <List>
         {sidebarItems.map(({ label, icon, path }) => (
           <NavLink
@@ -82,34 +98,41 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               `block rounded-md ${
                 isActive
                   ? "bg-[#F0D9DA] text-gray-900"
-                  : "hover:bg-[#F0D9DA] hover:text-gray-900  text-[#F0D9DA]"
-              } text-lg font-medium`
+                  : "hover:bg-[#EDE3F0] hover:text-gray-900 text-[#F0D9DA]"
+              } text-lg font-base transition-all duration-300`
             }
           >
-            <ListItem className="flex items-center gap-4 px-4 py-3">
-              <ListItemPrefix className="text-lg">{icon}</ListItemPrefix>
+            <ListItem className="flex items-center gap-4 px-1 py-3">
+              <ListItemPrefix className="text-xl">{icon}</ListItemPrefix>
               {sidebarOpen && (
-                <Typography className="text-sm">{label}</Typography>
+                <Typography className="text-base font-semibold">
+                  {label}
+                </Typography>
               )}
             </ListItem>
           </NavLink>
         ))}
       </List>
-      <hr className="my-2 border-[#E1F1DD]" />
-      <div>
+
+      <hr className="my-4 border-gray-300 opacity-40" />
+
+      {/* Logout Button */}
+      <div className="px-4">
         <button
-          className="block w-full px-4 py-3 rounded-md hover:text-[#E1F1DD] hover:translate-x-1 text-[#E1F1DD]"
+          className="flex items-center w-full px-4 py-3 text-left rounded-md text-[#E1F1DD] hover:bg-[#B9B4C7] hover:text-[#3E3B4B] transition-all duration-300"
           onClick={handleLogout}
         >
-          <div className="flex items-center gap-4">
-            <CgLogOut className="text-lg" />
-            {sidebarOpen && <Typography className="text-md">Logout</Typography>}
-          </div>
+          <CgLogOut className="text-lg" />
+          {sidebarOpen && (
+            <Typography className="ml-4 text-md font-medium">Logout</Typography>
+          )}
         </button>
       </div>
+
+      {/* Sidebar Toggle Button */}
       <button
         onClick={() => setSidebarOpen((prev) => !prev)}
-        className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-[#E1F1DD] p-2 rounded-full hover:bg-[#B9B4C7] hover:text-[#424153] text-2xl"
+        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 p-3 bg-[#423554] text-[#E1F1DD] hover:bg-[#B9B4C7] hover:text-[#3E3B4B] rounded-full shadow-md transition-all duration-300"
       >
         {sidebarOpen ? <IoIosArrowBack /> : <IoIosArrowForward />}
       </button>

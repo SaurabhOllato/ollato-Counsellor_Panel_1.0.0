@@ -13,9 +13,7 @@ const UserContext = createContext({
 });
 
 export const UserProvider = ({ children }) => {
-  const [user,  
-    
-    setUser] = useState(() => {
+  const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
@@ -60,10 +58,15 @@ export const UserProvider = ({ children }) => {
     localStorage.setItem("completedSteps", JSON.stringify(completedSteps));
   }, [completedSteps]);
 
-  const login = (userData) => {
-    setUser(userData);
-    setProfileStatus(userData.profileStatus || "pending");
-    setCompletedSteps(userData.completedSteps || []);
+  const login = (user) => {
+    // if (!user || !user.profileStatus) {
+    //   console.error("Invalid user object in login:", user);
+    //   return;
+    // }
+
+    setUser(user);
+    setProfileStatus(user.profileStatus || "pending");
+    setCompletedSteps(user.completedSteps || []);
   };
 
   const logout = () => {

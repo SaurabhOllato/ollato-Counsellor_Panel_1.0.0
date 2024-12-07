@@ -284,7 +284,7 @@ function AvailabilityManagements() {
         },
       ];
 
-      setAvailability(mockData);
+      // setAvailability(mockData);
     };
     fetchAvailability();
   }, [setAvailability, showAvailabilityTable]);

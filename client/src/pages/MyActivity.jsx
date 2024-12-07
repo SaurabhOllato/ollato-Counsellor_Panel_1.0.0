@@ -612,7 +612,7 @@ function MyActivity() {
                 ) === "Upcoming" && !session.feedbackGiven ? (
                   <button
                     onClick={() => handleJoinSession(session)}
-                    className={`px-4 py-2 bg-[#355F2E] text-white text-sm rounded-lg shadow hover:bg-[#388E3C] ${
+                    className={`w-full px-4 py-2 bg-[#355F2E] text-white text-sm rounded-lg shadow hover:bg-[#388E3C] ${
                       !isJoinSessionEnabled(session.appointmentDate)
                         ? "cursor-not-allowed opacity-50"
                         : ""
@@ -624,7 +624,7 @@ function MyActivity() {
                 ) : (
                   <button
                     onClick={() => setFeedbackSession(session)}
-                    className="px-4 py-2 bg-[#AA5486] text-white text-sm rounded-lg shadow hover:bg-[#6d3254]"
+                    className="w-full px-4 py-2 bg-[#AA5486] text-white text-sm rounded-lg shadow hover:bg-[#6d3254] "
                   >
                     Feedback
                   </button>
