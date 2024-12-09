@@ -1,99 +1,3 @@
-// import React, { useState } from "react";
-// import {
-//   format,
-//   startOfWeek,
-//   addDays,
-//   subWeeks,
-//   addWeeks,
-//   isSameDay,
-// } from "date-fns";
-// import {
-//   IoIosArrowDropleftCircle,
-//   IoIosArrowDroprightCircle,
-// } from "react-icons/io";
-
-// function CustomCalendar({ date, onDateChange }) {
-//   const [currentDay, setCurrentDay] = useState(new Date());
-//   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date()));
-//   const [currentMonth, setCurrentMonth] = useState(new Date());
-
-//   const handleDateClick = (selectedDate) => {
-//     onDateChange(selectedDate);
-//   };
-
-//   const prevWeek = () => setCurrentWeek((prev) => subWeeks(prev, 1));
-//   const nextWeek = () => setCurrentWeek((prev) => addWeeks(prev, 1));
-
-//   const days = Array.from({ length: 7 }).map((_, index) =>
-//     addDays(currentWeek, index)
-//   );
-//   // Generate the dates for the current week
-//   const weekDates = Array.from({ length: 7 }).map((_, index) =>
-//     addDays(currentWeek, index)
-//   );
-//   const monthDates = Array.from({ length: 42 }).map((_, index) =>
-//     addDays(currentMonth, index)
-//   );
-
-//   return (
-//     <div className="max-w-xl mx-auto border p-2 rounded-md shadow-md bg-white">
-//       {/* Calendar Header */}
-//       <div className="flex items-center justify-between mb-4">
-//         <button
-//           onClick={prevWeek}
-//           className="p-2 bg-[#243642] text-white rounded-md hover:bg-[#1E3E62] hover:transform hover:scale-105"
-//         >
-//           <IoIosArrowDropleftCircle />
-//         </button>
-//         <h2 className="text-lg font-semibold text-gray-800">
-//           {format(currentDay, "MMMM d, yyyy")}
-//         </h2>
-//         <button
-//           onClick={nextWeek}
-//           className="p-2 bg-[#243642] text-white rounded-md hover:bg-[#274a61] hover:transform hover:scale-105"
-//         >
-//           <IoIosArrowDroprightCircle />
-//         </button>
-//       </div>
-
-//       {/* Days of the Week */}
-//       <div className="grid grid-cols-7 text-center font-medium text-[#1E3E62]" >
-//         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-//           <div key={day} className="py-2">
-//             {day}
-//           </div>
-//         ))}
-//       </div>
-
-//       {/* Dates of the Week */}
-//       <div className="grid grid-cols-7 gap-2 w-full">
-//         {weekDates.map((day) => {
-//           const isSelected = isSameDay(day, date);
-//           const isToday = isSameDay(day, new Date());
-
-//           return (
-//             <button
-//               key={day}
-//               onClick={() => handleDateClick(day)}
-//               className={`px-2 py-1 rounded-md text-center ${
-//                 isSelected
-//                   ? "bg-indigo-600 text-white"
-//                   : isToday
-//                   ? "bg-indigo-100 text-indigo-700"
-//                   : "bg-white text-gray-700"
-//               } hover:bg-indigo-200 border border-gray-300`}
-//             >
-//               {format(day, "d")}
-//             </button>
-//           );
-//         })}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default CustomCalendar;
-
 import React, { useState } from "react";
 import {
   format,
@@ -184,7 +88,7 @@ function CustomCalendar({ date, onDateChange }) {
                 isSelected
                   ? "bg-[#433878] text-white"
                   : isToday
-                  ? "bg-indigo-100 text-[#433878]"
+                  ? "bg-[#659287] text-[#ffffff]"
                   : "bg-white text-gray-700"
               } hover:bg-[#433878] hover:text-[#f4f2fc] border-[#433878]`}
             >

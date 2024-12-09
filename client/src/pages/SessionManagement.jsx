@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNotification } from "../context/NotificationContext";
 import axios from "axios"; // For backend API integration
 
@@ -179,10 +179,16 @@ function SessionManagement() {
     }
   };
 
-  const filteredSessions =
-    activeStatus === ""
+  // const filteredSessions =
+  //   activeStatus === ""
+  //     ? sessions
+  //     : sessions.filter((session) => session.status === activeStatus);
+
+  const filteredSessions = useMemo(() => {
+    return activeStatus === ""
       ? sessions
       : sessions.filter((session) => session.status === activeStatus);
+  }, [activeStatus, sessions]);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
